@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "917250579338",
+    "project_id": "newsroom-4905",
+    "storage_bucket": "newsroom-4905.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:917250579338:android:8f79c1b7b524bf15dc4673",
+        "android_client_info": {
+          "package_name": "comp4905.newsroom"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "917250579338-1543fp9m71a834p4j9uilq1qivu0i7rm.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "comp4905.newsroom",
+            "certificate_hash": "a5d5e1468dab69d999ae62272f7e613145039648"
+          }
+        },
+        {
+          "client_id": "917250579338-do1gbuiddjsu6qklj9h4gfdor6iaes3b.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBtJWhcWOUHkyyY6Ma3VPpoIfwEP5i8sd4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "917250579338-do1gbuiddjsu6qklj9h4gfdor6iaes3b.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
