@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    app:cardCornerRadius="4dp"
+    android:padding="4dp"
+    android:layout_margin="5dp"
+    android:id="@+id/recipe_search_card_layout">
+    <!-- drawable/component_6.xml
+    <View
+        android:id="@+id/card_item_view"
+        android:layout_width="388.01dp"
+        android:layout_height="239dp"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentBottom="true"
+        android:background="@drawable/card_item_rectangle">
+-->
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/component_6"
+        android:layout_width="match_parent"
+        android:layout_height="239dp"
+        android:layout_alignParentLeft="true"
+        android:layout_marginLeft="10dp"
+        android:layout_alignParentTop="true" >
+        <!-- android:background="@drawable/card_item"-->
+
+        <TextView
+            android:id="@+id/article_title_view"
+            android:layout_width="180dp"
+            android:layout_height="30dp"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentBottom="true"
+            android:layout_marginLeft="10dp"
+            android:layout_marginTop="10dp"
+            android:text="Article title"
+            android:textSize="18sp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/article_category_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:layout_marginRight="10dp"
+            android:text="Category"
+            android:textSize="18sp"
+            android:textAlignment="viewEnd"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/article_summary_view"
+            android:layout_width="match_parent"
+            android:layout_height="140dp"
+            android:clickable="true"
+            android:layout_marginTop="10dp"
+            android:text="@string/lorem_ipsum"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/article_title_view" />
+
+        <TextView
+            android:id="@+id/publisher_date_view"
+            android:layout_width="225dp"
+            android:layout_height="27dp"
+            android:layout_marginLeft="10dp"
+            android:layout_marginBottom="10dp"
+            android:text="Publisher (Date)"
+            android:textSize="18sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <ImageView
+            android:id="@+id/news_search_chat"
+            android:clickable="true"
+            android:visibility="visible"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_marginBottom="5dp"
+            android:layout_marginRight="10dp"
+            android:src="@drawable/chat_bubble"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/news_search_external_link" />
+
+        <ImageView
+            android:id="@+id/news_search_external_link"
+            android:clickable="true"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_marginRight="10dp"
+            android:src="@drawable/news_card_link"
+            app:layout_constraintBottom_toBottomOf="@+id/news_search_chat"
+            app:layout_constraintEnd_toStartOf="@+id/news_search_empty_heart" />
+
+        <ImageView
+            android:id="@+id/news_search_empty_heart"
+            android:clickable="true"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_marginRight="10dp"
+            android:src="@drawable/empty_heart"
+            app:layout_constraintBottom_toBottomOf="@+id/news_search_chat"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <!-- drawable/component_6.xml
+    </View>
+    -->
+
+</androidx.cardview.widget.CardView>

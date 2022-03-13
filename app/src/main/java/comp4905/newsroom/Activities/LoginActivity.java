@@ -10,24 +10,16 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.Query;
-import com.google.firebase.database.ValueEventListener;
-
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.util.ArrayList;
 
 import comp4905.newsroom.Classes.FirebaseDatabaseHelper;
+import comp4905.newsroom.Classes.Globals;
 import comp4905.newsroom.Classes.User;
 import comp4905.newsroom.R;
 
@@ -101,8 +93,8 @@ public class LoginActivity extends AppCompatActivity {
                             loginErrorTextview.setText("Successfully logged in!");
 
                             //get the data
-                            String firstName = String.valueOf(dataSnapshot.child("firstname").getValue());
-                            String lastName = String.valueOf(dataSnapshot.child("lastname").getValue());
+                            String firstName = String.valueOf(dataSnapshot.child("firstName").getValue());
+                            String lastName = String.valueOf(dataSnapshot.child("lastName").getValue());
                             String email = String.valueOf(dataSnapshot.child("email").getValue());
                             ArrayList<String> favorites = new ArrayList<>();
                             Iterable<DataSnapshot> favoritesSnapshot =  dataSnapshot.child("favorites").getChildren();
@@ -111,6 +103,17 @@ public class LoginActivity extends AppCompatActivity {
                             {
                                 favorites.add(topic.getValue(String.class));
                             }
+
+                            //initialize the global user
+                            Globals.deviceUser = new User(firstName, lastName, username, email, firebasePass, favorites);
+
+                            //log user to make sure object was created
+                            Log.i(TAG, "login() => user: " + Globals.deviceUser);
+
+                            //move to the news activity intent
+                            Intent newsActivity = new Intent(LoginActivity.this, NewsActivity.class);
+                            startActivity(newsActivity);
+
                         }
                         else
                         {

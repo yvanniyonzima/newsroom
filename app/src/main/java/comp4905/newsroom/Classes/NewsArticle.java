@@ -52,17 +52,16 @@ public class NewsArticle
 
     @Override
     public String toString() {
-        return "NewsArticle{" +
-                "title='" + title + '\'' +
-                ", author='" + author + '\'' +
-                ", datePublished='" + datePublished + '\'' +
-                ", link='" + link + '\'' +
-                ", summary='" + summary + '\'' +
-                ", topic='" + topic + '\'' +
-                ", mediaLink='" + mediaLink + '\'' +
-                ", publisher='" + publisher + '\'' +
-                ", country='" + country + '\'' +
-                ", language='" + language + '\'' +
-                '}';
+        String articleInfo = "Article: " + title + "\n" +
+                            "Author: " + author + "\n" +
+                            "Date Published: " + datePublished + "\n" +
+                            "link: " + link + "\n" +
+                            "Summary: " + summary + "\n" +
+                            "Topic: " + topic + "\n" +
+                            "Media Links: " + mediaLink + "\n" +
+                            "Publisher: " + publisher + "\n" +
+                            "Country: " + country + "\n" +
+                            "Language: " + language + "\n";
+        return articleInfo;
     }
 }

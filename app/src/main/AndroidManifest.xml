@@ -11,20 +11,33 @@
         android:theme="@style/Theme.Newsroom">
         <activity android:name=".Activities.LoginActivity"
             android:exported="true">
+
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+
         </activity>
         <activity
             android:name=".Activities.NewUserActivity"
-            android:exported="false" />
+            android:exported="false" ></activity>
         <activity
             android:name=".Activities.NewsActivity"
             android:exported="true">
 
+
         </activity>
+
+        <activity
+            android:name=".Activities.ProfileActivity"
+            android:exported="true">
+
+        </activity>
+
+        <meta-data
+            android:name="preloaded_fonts"
+            android:resource="@array/preloaded_fonts" />
     </application>
 
 </manifest>

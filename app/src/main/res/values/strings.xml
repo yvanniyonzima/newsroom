@@ -14,4 +14,12 @@
         - Be at least 6 characters long\n
         - Contain at least one number
     </string>
+
+    <string name="home_page_title">
+        News
+    </string>
+
+    <string name="lorem_ipsum">
+        Lörem ipsum ipovuktiga jor monoktig. Abbel. Semikalingar telenode. Lörem ipsum ipovuktiga jor monoktig. Abbel. Semikalingar telenode.
+    </string>
 </resources>

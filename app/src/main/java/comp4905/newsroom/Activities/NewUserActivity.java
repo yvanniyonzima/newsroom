@@ -4,6 +4,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -13,12 +14,11 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gms.common.util.ArrayUtils;
-
 import java.util.ArrayList;
 import java.util.Collections;
 
 import comp4905.newsroom.Classes.FirebaseDatabaseHelper;
+import comp4905.newsroom.Classes.Globals;
 import comp4905.newsroom.Classes.User;
 import comp4905.newsroom.R;
 
@@ -43,10 +43,10 @@ public class NewUserActivity extends AppCompatActivity {
     private String mUsername;
     private String mPassword;
     private ArrayList<String> mFavoriteTopics = new ArrayList<>();
-    private User mNewUser;
+    //private User mNewUser;
 
-    private String[] topics = {"News", "Sport", "Tech", "World", "Finance", "Politics",
-                                "Business", "Economics", "Entertainment", "Beauty", "Gaming"};
+//    private String[] topics = {"News", "Sport", "Tech", "World", "Finance", "Politics",
+//                                "Business", "Economics", "Entertainment", "Beauty", "Gaming"};
     boolean[] selectedTopics;
     ArrayList<Integer> topicsList = new ArrayList<>();
 
@@ -71,17 +71,22 @@ public class NewUserActivity extends AppCompatActivity {
         registerButton = (Button) findViewById(R.id.register_button);
 
         //initialize selectedTopic array
-        selectedTopics = new boolean[topics.length];
+        selectedTopics = new boolean[Globals.topics.length];
 
         registerButton.setOnClickListener((View v)->
         {
             //call register user function
             if(registerUser())
             {
-                mDatabseHelper.saveUser(mNewUser).addOnSuccessListener(success ->
+                mDatabseHelper.saveUser(Globals.deviceUser).addOnSuccessListener(success ->
                 {
                     Toast.makeText(this, "Creation successful", Toast.LENGTH_SHORT).show();
                     Log.i(TAG, "registerButtonOnClick(): " + success.toString());
+
+                    //INTENT TO MOVE TO NEWSACTIVITY
+                    Intent newsActivity = new Intent(NewUserActivity.this, NewsActivity.class);
+                    startActivity(newsActivity);
+
                 }).addOnFailureListener(error ->
                 {
                     Toast.makeText(this, error.toString(), Toast.LENGTH_SHORT).show();
@@ -213,10 +218,10 @@ public class NewUserActivity extends AppCompatActivity {
             return false;
         }
 
-        mNewUser = new User(mFirstName, mLastName, mUsername, mEmail, mPassword, mFavoriteTopics);
-        Toast toast = Toast.makeText(getApplicationContext(), mNewUser.toString(), Toast.LENGTH_LONG);
+        Globals.deviceUser = new User(mFirstName, mLastName, mUsername, mEmail, mPassword, mFavoriteTopics);
+        Toast toast = Toast.makeText(getApplicationContext(), Globals.deviceUser.toString(), Toast.LENGTH_LONG);
         toast.show();
-        Log.i(TAG, mNewUser.toString());
+        Log.i(TAG, Globals.deviceUser.toString());
 
         return true;
 
@@ -229,7 +234,7 @@ public class NewUserActivity extends AppCompatActivity {
         chooseTopicsAlert.setTitle("Choose at least 2 topics");
         chooseTopicsAlert.setCancelable(false);
 
-        chooseTopicsAlert.setMultiChoiceItems(topics, selectedTopics, new DialogInterface.OnMultiChoiceClickListener() {
+        chooseTopicsAlert.setMultiChoiceItems(Globals.topics, selectedTopics, new DialogInterface.OnMultiChoiceClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i, boolean checkboxSelected) {
                 // check condition
@@ -257,9 +262,9 @@ public class NewUserActivity extends AppCompatActivity {
                 // use for loop
                 for (int j = 0; j < topicsList.size(); j++) {
                     // concat array value
-                    stringBuilder.append(topics[topicsList.get(j)]);
+                    stringBuilder.append(Globals.topics[topicsList.get(j)]);
                     //add topic to favorites
-                    mFavoriteTopics.add(topics[topicsList.get(j)]);
+                    mFavoriteTopics.add(Globals.topics[topicsList.get(j)]);
                     // check condition
                     if (j != topicsList.size() - 1) {
                         // When j value  not equal
