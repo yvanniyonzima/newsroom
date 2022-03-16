@@ -22,6 +22,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import comp4905.newsroom.Classes.Globals;
 import comp4905.newsroom.R;
 
 public class ProfileActivity extends AppCompatActivity {
@@ -32,6 +33,7 @@ public class ProfileActivity extends AppCompatActivity {
     private ImageView mEditFavorites;
     private ImageView mChangePassword;
 
+    private TextView mUserFullName;
     private EditText mUserName;
     private EditText mEmail;
     private EditText mPassword;
@@ -62,7 +64,7 @@ public class ProfileActivity extends AppCompatActivity {
         mUserMenu = (ImageView) findViewById(R.id.profile_user_menu);
         mEditFavorites = (ImageView) findViewById(R.id.profile_edit_favorites);
         mChangePassword = (ImageView) findViewById(R.id.profile_change_password);
-
+        mUserFullName = (TextView) findViewById(R.id.profile_user_full_name);
         mUserName = (EditText) findViewById(R.id.profile_username);
         mEmail = (EditText) findViewById(R.id.profile_email);
         mPassword = (EditText) findViewById(R.id.profile_password);
@@ -79,6 +81,9 @@ public class ProfileActivity extends AppCompatActivity {
 
         //setup arrays and adapter
         setupArraysAndAdapters();
+
+        //setup view user data
+        setViewUserData();
 
         //onclick for back arrow
         mBackArrow.setOnClickListener((View view) ->
@@ -115,6 +120,8 @@ public class ProfileActivity extends AppCompatActivity {
         mDoneAddingTopics.setOnClickListener((View view) -> {
             //exit from topics edit mode
             editTopicsMode(false);
+
+            //TODO: save new password to firebase
         });
 
         //onclick for change password
@@ -140,6 +147,18 @@ public class ProfileActivity extends AppCompatActivity {
         mPassword.setClickable(false);
     }
 
+    //function to set the textviews with users data
+    private void setViewUserData()
+    {
+        String fullName = Globals.deviceUser.getFirstName() + " " + Globals.deviceUser.getLastName();
+        mUserFullName.setText(fullName);
+        mUserName.setText(Globals.deviceUser.getUserName());
+        mEmail.setText(Globals.deviceUser.getEmail());
+        mTopics.clear();
+        mTopics.addAll(Globals.deviceUser.getFavorites());
+        mTopicsArrayAdapter.notifyDataSetChanged();
+    }
+
     //function to setup menu
     private void setUpMenu ()
     {
@@ -148,10 +167,6 @@ public class ProfileActivity extends AppCompatActivity {
 
         //inflate the popup menu with xml file
         mainMenu.getMenuInflater().inflate(R.menu.main_menu, mainMenu.getMenu());
-
-        //set the user profile menu item to not visible
-//        MenuItem userProfileItem = findViewById(R.id.user_profile_menu_option);
-//        userProfileItem.setVisible(false);
 
         //register menu with OnMenuItemClickListener
         mainMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
@@ -190,15 +205,10 @@ public class ProfileActivity extends AppCompatActivity {
         mTopics = new ArrayList<>();
         mOtherTopics = new ArrayList<>();
 
-        //dummy topics to test
-        mTopics.add("Technology");
-        mTopics.add("Sports");
-        mTopics.add("Business");
-
         //add elements to other topics
         for(String topic: topics)
         {
-            if(!mTopics.contains(topic))
+            if(!Globals.deviceUser.getFavorites().contains(topic))
             {
                 mOtherTopics.add(topic);
             }

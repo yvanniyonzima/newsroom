@@ -24,6 +24,7 @@ import android.widget.TextView;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 
 import comp4905.newsroom.Classes.ArticleCardItem;
@@ -93,8 +94,7 @@ public class NewsActivity extends AppCompatActivity {
             public void run() {
                 super.run();
                 try {
-                    String responseString = apiClient.searchUserPreferedNews();
-                    newsJSONParser.parseNewsResults(responseString);
+                    String responseString = apiClient.searchUserPreferredNews();
                     mArticles.addAll(newsJSONParser.parseNewsResults(responseString));
 
                     //Add articles to recycler adapter
@@ -392,14 +392,71 @@ public class NewsActivity extends AppCompatActivity {
 
         //make an array of languages
         String languages = mNewsFeedLanguages.getText().toString().trim();
+        String [] languagesArray = new String[0];
+
+        if(!languages.isEmpty() || languages != null)
+        {
+            languagesArray = languages.split(", ");
+        }
+        else
+        {
+            Log.i(TAG, "submitNewsFeedFilter() => no language selected");
+        }
 
         //log to make sure of selections
         Log.i(TAG, "submitNewsFeedFilter() => " +
-                "{Languages: " + languages.toString() + "}, " +
+                "{Languages: " + Arrays.toString(languagesArray)+ "}, " +
                 "{ Sorting: " + mSelectedSorting + "}, " +
                 "{Sentiment: " + mSelectedSentiment + "}");
 
-        //TODO: Call news feed filter api search
+        //make and start the thread to search to the news feed
+        String[] finalLanguagesArray = languagesArray;
+        Thread newsFeedSearchThread = new Thread()
+        {
+            @Override
+            public void run() {
+                super.run();
+
+                try
+                {
+                    String newsFeedResults = apiClient.searchNewsFeed(finalLanguagesArray, mSelectedSorting, mSelectedSentiment);
+                    ArrayList<NewsArticle> newsFeedArticles = new ArrayList<>();
+                    newsFeedArticles.addAll(newsJSONParser.parseNewsResults(newsFeedResults));
+
+                    //clear recycler adapter
+                    mArticleCardItems.clear();
+
+                    //Add articles to recycler adapter
+                    for(NewsArticle article: newsFeedArticles)
+                    {
+                        ArticleCardItem cardItem = new ArticleCardItem(article.getTitle(), article.getTopic(), article.getSummary(),
+                                article.getPublisher(), article.getDatePublished(), article.getLink());
+
+                        mArticleCardItems.add(cardItem);
+
+
+
+                    }
+
+                    //notify that the data changed
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                mNewsRecyclerAdapter.notifyDataSetChanged();
+                            }
+                        });
+
+                }
+                catch (IOException exception)
+                {
+                    Log.e(TAG, "submitNewsFeed => failed to fetch news feed: " + exception);
+                }
+            }
+        };
+
+        //start the thread
+        newsFeedSearchThread.start();
+
     }
 
 

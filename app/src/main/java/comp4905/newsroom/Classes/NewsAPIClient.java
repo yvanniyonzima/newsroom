@@ -3,7 +3,6 @@ package comp4905.newsroom.Classes;
 import android.util.Log;
 
 import java.io.IOException;
-import java.util.Locale;
 
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -22,6 +21,7 @@ public class NewsAPIClient
 
     //ENDPOINTS
     private static final String TOPIC_SEARCH = "topic-search?";
+    private static final String NEWS_FEED_ENDPOINT = "feed?";
 
     private OkHttpClient okHttpClient = new OkHttpClient();
 
@@ -30,32 +30,10 @@ public class NewsAPIClient
 
     public NewsAPIClient(){}
 
-    public String searchNews(String query) throws IOException
+
+    public String searchUserPreferredNews() throws IOException
     {
-        //build the request
-        request = new Request.Builder()
-                .url("https://news67.p.rapidapi.com/v2/feed?categoryCode=medtop%3A20000392&languages=en")
-                .get()
-                .addHeader(KEY_NAME,API_KEY)
-                .addHeader(HOST_NAME,HOST)
-                .build();
-
-        //get the response object
-        response = okHttpClient.newCall(request).execute();
-
-        //convert response to json String
-        String responseToString = response.body().string();
-
-        Log.i(TAG,"searchNews() => " + responseToString);
-
-        //return response
-        return responseToString;
-
-    }
-
-    public String searchUserPreferedNews() throws IOException
-    {
-        //BUILD THE URL USING PREFFERED LANGUAGE AND TOPICS
+        //BUILD THE URL USING PREFERRED LANGUAGE AND TOPICS
         String fullURL = BASE_URL + TOPIC_SEARCH;
 
         //add the language to the url (currently defaulted to english)
@@ -101,6 +79,73 @@ public class NewsAPIClient
         //return response
         return responseToString;
 
+    }
+
+    //function for news feed search
+    public String searchNewsFeed(String[] languages, String sorting, String sentiment) throws IOException
+    {
+        //build the url
+        String newsFeedUrl = BASE_URL + NEWS_FEED_ENDPOINT;
+
+        //default batch size is 30
+        newsFeedUrl += "batchSize=30";
+
+        //get the languages
+        if(languages.length > 0 && languages[0] != null && !languages[0].isEmpty())
+        {
+            newsFeedUrl += "&languages=";
+            for(int i = 0; i < languages.length; i++)
+            {
+                Log.i(TAG, "searchNewsFeed => getting code for languages: " + languages[i]);
+                if(i == (languages.length - 1))
+                {
+                    //last element
+                    newsFeedUrl += Globals.languagesMap.get(languages[i]);
+                }
+                else
+                {
+                    newsFeedUrl += Globals.languagesMap.get(languages[i]) + "%2C";
+                }
+            }
+        }
+
+        //get the sorting order
+        if(!sorting.isEmpty())
+        {
+            newsFeedUrl += "&sortOrder=" + sorting;
+        }
+
+        //get the sentiment
+        if(!sentiment.isEmpty())
+        {
+            //if the sentiment is not set to both, only then append to the url
+            //by default, the api searches for both sentiments
+            if(!sentiment.equals("both"))
+            {
+                newsFeedUrl += "&sentiment=" + sentiment;
+            }
+        }
+
+        Log.i(TAG,"searchNewsFeed() => Request: " + newsFeedUrl);
+
+        //build the request
+        request = new Request.Builder()
+                .url(newsFeedUrl)
+                .get()
+                .addHeader(KEY_NAME,API_KEY)
+                .addHeader(HOST_NAME,HOST)
+                .build();
+
+        //get the response object
+        response = okHttpClient.newCall(request).execute();
+
+        //convert response to json String
+        String responseToString = response.body().string();
+
+        Log.i(TAG,"searchNews() => Response:" + responseToString);
+
+        //return response
+        return responseToString;
     }
 
 }
