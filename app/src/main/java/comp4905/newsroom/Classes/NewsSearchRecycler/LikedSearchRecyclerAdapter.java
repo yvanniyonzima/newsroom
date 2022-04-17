@@ -14,7 +14,7 @@ import java.util.ArrayList;
 import comp4905.newsroom.Classes.ArticleCardItem;
 import comp4905.newsroom.R;
 
-public class NewsSearchRecyclerAdapter extends RecyclerView.Adapter<NewsSearchRecyclerAdapter.RecyclerViewHolder> {
+public class LikedSearchRecyclerAdapter extends RecyclerView.Adapter<LikedSearchRecyclerAdapter.RecyclerViewHolder> {
 
     private ArrayList<ArticleCardItem> mArticleCardList;
     private OnItemClickListener mClickListener;
@@ -25,7 +25,7 @@ public class NewsSearchRecyclerAdapter extends RecyclerView.Adapter<NewsSearchRe
         void onSummaryClicked(int position);
         void onChatBubbleClick(int position);
         void onExternalLinkClick(int position);
-        void onLikeClick(int position);
+        void onDeleteClick(int position);
     }
 
     public void setOnItemClickListener(OnItemClickListener listener){mClickListener = listener;}
@@ -38,8 +38,7 @@ public class NewsSearchRecyclerAdapter extends RecyclerView.Adapter<NewsSearchRe
         public TextView mArticlePublisherAndDate;
         public ImageView mChatBubble;
         public ImageView mExternalLink;
-        public ImageView mLikeArticle;
-        private boolean mLiked = false;
+        public ImageView mDeleteArticle;
 
         public RecyclerViewHolder(@NonNull View itemView, final OnItemClickListener listener)
         {
@@ -51,7 +50,9 @@ public class NewsSearchRecyclerAdapter extends RecyclerView.Adapter<NewsSearchRe
             mArticlePublisherAndDate = itemView.findViewById(R.id.publisher_date_view);
             mChatBubble = itemView.findViewById(R.id.news_search_chat);
             mExternalLink = itemView.findViewById(R.id.news_search_external_link);
-            mLikeArticle = itemView.findViewById(R.id.news_search_empty_heart);
+            mDeleteArticle = itemView.findViewById(R.id.news_search_empty_heart);
+
+            mDeleteArticle.setImageResource(R.drawable.ic_delete_24);
 
             /*=========================ON CLICK LISTENERS BEGIN============================*/
             /*
@@ -107,7 +108,7 @@ public class NewsSearchRecyclerAdapter extends RecyclerView.Adapter<NewsSearchRe
             });
 
             /*on click to like the article. This will save the article to the database*/
-            mLikeArticle.setOnClickListener(new View.OnClickListener() {
+            mDeleteArticle.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
 
@@ -116,7 +117,7 @@ public class NewsSearchRecyclerAdapter extends RecyclerView.Adapter<NewsSearchRe
                         int position = getAdapterPosition();
                         if(position != RecyclerView.NO_POSITION)
                         {
-                            listener.onLikeClick(position);
+                            listener.onDeleteClick(position);
 
                         }
                     }
@@ -127,7 +128,7 @@ public class NewsSearchRecyclerAdapter extends RecyclerView.Adapter<NewsSearchRe
         }
     }
 
-    public NewsSearchRecyclerAdapter(ArrayList<ArticleCardItem> articleList)
+    public LikedSearchRecyclerAdapter(ArrayList<ArticleCardItem> articleList)
     {
         mArticleCardList = new ArrayList<>();
         mArticleCardList = articleList;

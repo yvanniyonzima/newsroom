@@ -13,6 +13,8 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -20,7 +22,9 @@ import android.widget.PopupMenu;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.SearchView;
+import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -28,9 +32,11 @@ import java.util.Arrays;
 import java.util.Collections;
 
 import comp4905.newsroom.Classes.ArticleCardItem;
+import comp4905.newsroom.Classes.FirebaseDatabaseHelper;
 import comp4905.newsroom.Classes.Globals;
 import comp4905.newsroom.Classes.NewsAPIClient;
 import comp4905.newsroom.Classes.NewsArticle;
+import comp4905.newsroom.Classes.NewsSearchRecycler.LikedSearchRecyclerAdapter;
 import comp4905.newsroom.Classes.NewsSearchRecycler.NewsSearchRecyclerAdapter;
 import comp4905.newsroom.Classes.ParseJSONResults;
 import comp4905.newsroom.R;
@@ -46,26 +52,72 @@ public class NewsActivity extends AppCompatActivity {
     private NewsSearchRecyclerAdapter mNewsRecyclerAdapter;
     private Button mFilterButton;
 
+    //liked searches recyclerview
+    private RecyclerView mLikedNewsRecycleView;
+    private RecyclerView.LayoutManager mLikedNewsLayoutManager;
+    private LikedSearchRecyclerAdapter mLikedNewsRecyclerAdapter;
+
     //news feed filter layouts, UI and filter variables
-    private View mNewsFeedView;
+    private View mNewsFeedFilterView;
     private TextView mNewsFeedLanguages;
     private RadioGroup mNewsFeedSort;
     private RadioGroup mNewsFeedSentiment;
-    private String mSelectedSorting = "";
-    private String mSelectedSentiment = "";
+    private String mSelectedNewsFeedSorting = "";
+    private String mSelectedNewsFeedSentiment = "";
+
+    //world trending filter layout, UI and filer variables
+    private View mWorldTrendingFilterView;
+    private TextView mWorldTrendingLanguages;
+
+    //topic search filter layout, UI and filter variables
+    private View mTopicSearchFilterLayout;
+    private TextView mTopicSearchLanguages;
+    private RadioGroup mTopicSearchSorting;
+    private String mSelectedTopicSearchSorting = "";
+
+    //country news filter layout, UI and filter variable
+    private View mCountryNewsFilterLayout;
+    private Spinner mCountryNewsSource;
+    private ArrayAdapter<String> mCountryNewsSourceSpinnerAdapter;
+    private String mFromCountrySelected = "";
+    private Spinner mCountryNewsAbout;
+    private ArrayAdapter<String> mCountryNewsAboutSpinnerAdapter;
+    private String mAboutCountrySelected = "";
+    private TextView mCountryNewsLanguages;
+    private RadioGroup mCountryNewsInternational;
+    private String mCountryNewsInternationalSelected = "";
+
+    private View mSubmitCancelFilterView;
+
+    //view news and liked buttons
+    private Button mNews;
+    private Button mLikes;
 
     //filter submit and cancel buttons
-    private Button mSubmitNewsFeedFilter;
-    private Button mCancelNewsFeedFilter;
+    private Button mSubmitFilter;
+    private Button mCancelFilter;
 
 
     private ArrayList<ArticleCardItem> mArticleCardItems = new ArrayList<>();
     private ArrayList<NewsArticle> mArticles = new ArrayList<>();
 
+    private ArrayList<ArticleCardItem> mLikedArticleCardItems = new ArrayList<>();
+    private ArrayList<NewsArticle> mLikedArticles = new ArrayList<>();
+
     private boolean[] newsFeedSelectedLanguages = new boolean[Globals.languages.length];
     private ArrayList<Integer> newsFeedLanguages = new ArrayList<>();
 
+    private boolean[] worldTrendingSelectedLanguages = new boolean[Globals.languages.length];
+    private ArrayList<Integer> worldTrendingLanguages = new ArrayList<>();
 
+    private boolean[] topicSearchSelectedLanguages = new boolean[Globals.languages.length];
+    private ArrayList<Integer> topicSearchLanguages = new ArrayList<>();
+
+    private boolean[] countryNewsSelectedLanguages = new boolean[Globals.languages.length];
+    private ArrayList<Integer> countryNewsLanguages = new ArrayList<>();
+
+    //database helper
+    FirebaseDatabaseHelper mDatabaseHelper = new FirebaseDatabaseHelper();
     NewsAPIClient apiClient = new NewsAPIClient();
     ParseJSONResults newsJSONParser = new ParseJSONResults();
     @Override
@@ -131,15 +183,58 @@ public class NewsActivity extends AppCompatActivity {
         mNewsSearchBar = (SearchView) findViewById(R.id.news_search_bar);
         mSearchNewsButton = (Button) findViewById(R.id.news_search_button);
         mFilterButton = (Button) findViewById(R.id.filter_news_button);
+        mNews = (Button) findViewById(R.id.view_searches_button);
+        mLikes = (Button) findViewById(R.id.liked_searches_button);
+
+        mSearchNewsButton.setOnClickListener((View view) -> {
+            handleTopicSearchFiltering();
+        });
+
+        mNews.setOnClickListener((View view) -> {
+            mLikedNewsRecycleView.setVisibility(View.GONE);
+            mNewsRecyclerView.setVisibility(View.VISIBLE);
+        });
+
+        mLikes.setOnClickListener((View view) -> {
+            mNewsRecyclerView.setVisibility(View.GONE);
+            mLikedNewsRecycleView.setVisibility(View.VISIBLE);
+        });
 
         /*INFLATE FILTER VIEWS AND VARIABLES*/
         //news filter view and variables
-        mNewsFeedView = (LinearLayout) findViewById(R.id.news_feed_filter_view);
+        mNewsFeedFilterView = (LinearLayout) findViewById(R.id.news_feed_filter_view);
         mNewsFeedLanguages = (TextView) findViewById(R.id.news_feed_languages);
         mNewsFeedSort = (RadioGroup) findViewById(R.id.news_feed_sort_group);
         mNewsFeedSentiment = (RadioGroup) findViewById(R.id.news_feed_sentiment_group);
-        mSubmitNewsFeedFilter = (Button) findViewById(R.id.submit_news_feed_filter);
-        mCancelNewsFeedFilter = (Button) findViewById(R.id.cancel_news_feed_filter);
+
+
+        //world trending view and variables
+        mWorldTrendingFilterView = (LinearLayout) findViewById(R.id.world_trending_filter_view);
+        mWorldTrendingLanguages = (TextView) findViewById(R.id.world_trending_languages);
+
+        //topic search view and variables
+        mTopicSearchFilterLayout = (LinearLayout) findViewById(R.id.topic_search_filter_view);
+        mTopicSearchLanguages = (TextView) findViewById(R.id.topic_search_languages);
+        mTopicSearchSorting = (RadioGroup) findViewById(R.id.topic_search_sort_group);
+
+        //country news view and variables
+        mCountryNewsFilterLayout = (LinearLayout) findViewById(R.id.country_news_filter_view);
+        mCountryNewsSource = (Spinner) findViewById(R.id.country_news_source);
+        mCountryNewsAbout = (Spinner) findViewById(R.id.country_news_about);
+        mCountryNewsLanguages = (TextView) findViewById(R.id.country_news_languages);
+        mCountryNewsInternational = (RadioGroup) findViewById(R.id.country_news_international_group);
+        //set the data for the spinner
+        mCountryNewsSourceSpinnerAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, Globals.countries);
+        mCountryNewsSource.setAdapter(mCountryNewsSourceSpinnerAdapter);
+
+        mCountryNewsAboutSpinnerAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, Globals.countries);
+        mCountryNewsAbout.setAdapter(mCountryNewsAboutSpinnerAdapter);
+
+
+        //cancel and submit filter view and buttons
+        mSubmitCancelFilterView = (LinearLayout) findViewById(R.id.filter_submit_cancel_view);
+        mSubmitFilter = (Button) findViewById(R.id.submit_news_feed_filter);
+        mCancelFilter = (Button) findViewById(R.id.cancel_news_feed_filter);
     }
 
     //function to setup menu
@@ -185,6 +280,8 @@ public class NewsActivity extends AppCompatActivity {
     //function to build the recycler view
     public void buildNewsRecyclerView()
     {
+
+        //setup news recycler adapter
         mNewsRecyclerView = (RecyclerView) findViewById(R.id.news_search_recyclerView);
         mNewsRecyclerView.setHasFixedSize(true);
         mRecyclerViewLayoutManager = new LinearLayoutManager(NewsActivity.this);
@@ -220,11 +317,149 @@ public class NewsActivity extends AppCompatActivity {
 
             @Override
             public void onLikeClick(int position) {
-                //TODO: save the article to the users firebase
+                //TODO: save the article to liked article card item to liked article the users firebase
+
+                mLikedArticles.add(mArticles.get(position));
+                mLikedArticleCardItems.add(mArticleCardItems.get(position));
+
+                //save to firebase
+                mDatabaseHelper.saveArticle(mArticles.get(position), Globals.deviceUser.getUserName()).addOnSuccessListener(success ->
+                {
+                    Toast.makeText(NewsActivity.this, "Article Saved Successfully!", Toast.LENGTH_SHORT).show();
+
+                    if(success != null)
+                    {
+                        Log.i(TAG, "buildNewsRecyclerView() -> onLikeClick(): " + success.toString());
+                    }
+
+
+                }).addOnFailureListener(error ->
+                {
+                    Toast.makeText(NewsActivity.this, "Failed to save Article!", Toast.LENGTH_SHORT).show();
+                    Log.i(TAG, "buildNewsRecyclerView() -> onLikeClick(): " + error);
+                });
+
+                //remove articles form current search
+                mArticles.remove(position);
+                mArticleCardItems.remove(position);
+
+                mNewsRecyclerAdapter.notifyDataSetChanged();
+                mLikedNewsRecyclerAdapter.notifyDataSetChanged();
+
+                if(mLikedArticles.size() > 0)
+                {
+                    String likesText = "Likes: " + mLikedArticles.size();
+                    mLikes.setText(likesText);
+                }
+                else
+                {
+                    mLikes.setText("Likes");
+                }
+
+
 
             }
         });
+
+        //setup liked news recycler adapter
+        mLikedNewsRecycleView = (RecyclerView) findViewById(R.id.liked_search_recyclerView);
+        mLikedNewsRecycleView.setHasFixedSize(true);
+        mLikedNewsLayoutManager = new LinearLayoutManager(NewsActivity.this);
+        mLikedNewsRecyclerAdapter = new LikedSearchRecyclerAdapter(mLikedArticleCardItems);
+        mLikedNewsRecycleView.setLayoutManager(mLikedNewsLayoutManager);
+        mLikedNewsRecycleView.setAdapter(mLikedNewsRecyclerAdapter);
+
+        //implement the interface for the different on clicks
+        mLikedNewsRecyclerAdapter.setOnItemClickListener(new LikedSearchRecyclerAdapter.OnItemClickListener() {
+            @Override
+            public void onItemClick(int position) {
+
+            }
+
+            @Override
+            public void onSummaryClicked(int position) {
+                //TODO: set the text box size to wrap content
+            }
+
+            @Override
+            public void onChatBubbleClick(int position) {
+                //TODO: create a new chat from the article
+            }
+
+            @Override
+            public void onExternalLinkClick(int position) {
+                String link = mArticles.get(position).getLink();
+                Uri uri = Uri.parse(link);
+                Log.i(TAG,"buildNewsRecyclerView() => following link: " + link);
+                Intent visitArticlePage = new Intent(Intent.ACTION_VIEW, uri);
+                startActivity(visitArticlePage);
+            }
+
+            @Override
+            public void onDeleteClick(int position) {
+                //TODO: remove article from firebase and from liked articles array list
+
+
+                AlertDialog.Builder deleteArticleAlert = new AlertDialog.Builder(NewsActivity.this);
+
+                deleteArticleAlert.setTitle("Delete Saved Article");
+                deleteArticleAlert.setMessage("Are you sure you want to delete this article?");
+                deleteArticleAlert.setIcon(R.drawable.ic_action_warning);
+                deleteArticleAlert.setCancelable(false);
+                deleteArticleAlert.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+
+                        mArticles.add(mLikedArticles.get(position));
+                        mArticleCardItems.add(mLikedArticleCardItems.get(position));
+
+                        mLikedArticles.remove(position);
+                        mLikedArticleCardItems.remove(position);
+
+                        mLikedNewsRecyclerAdapter.notifyDataSetChanged();
+                        mNewsRecyclerAdapter.notifyDataSetChanged();
+
+                        if(mLikedArticles.size() > 0)
+                        {
+                            String likesText = "Likes: " + mLikedArticles.size();
+                            mLikes.setText(likesText);
+                        }
+                        else
+                        {
+                            mLikes.setText("Likes");
+                        }
+                    }
+                });
+
+                deleteArticleAlert.setNegativeButton("No", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        dialogInterface.dismiss();
+                    }
+                });
+
+                deleteArticleAlert.show();
+
+
+            }
+        });
+
     }
+
+    private boolean articleIsLiked(String url)
+    {
+        for(int i = 0; i < mLikedArticles.size(); i++)
+        {
+            if(mLikedArticles.get(i).getLink().equals(url))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+
 
     //function to show menu of filtering options
     public void filterButtonClick()
@@ -244,23 +479,53 @@ public class NewsActivity extends AppCompatActivity {
                     mFilterButton.setText("Filter: News Feed");
 
                     //make view for news feed filter visible
-                    mNewsFeedView.setVisibility(View.VISIBLE);
+                    mNewsFeedFilterView.setVisibility(View.VISIBLE);
 
+                    mWorldTrendingFilterView.setVisibility(View.GONE);
+                    mTopicSearchFilterLayout.setVisibility(View.GONE);
+                    mCountryNewsFilterLayout.setVisibility(View.GONE);
                 }
                 else if(menuItem.getItemId() == R.id.world_trending)
                 {
+                    //set the text for the filter button
                     mFilterButton.setText("Filter: World Trending");
+
+                    //make view for world trending feed filter visible
+                    mWorldTrendingFilterView.setVisibility(View.VISIBLE);
+
+                    mNewsFeedFilterView.setVisibility(View.GONE);
+                    mTopicSearchFilterLayout.setVisibility(View.GONE);
+                    mCountryNewsFilterLayout.setVisibility(View.GONE);
 
                 }
                 else if (menuItem.getItemId() == R.id.topic_search)
                 {
+                    //set the text for the filter button
                     mFilterButton.setText("Filter: Topic Search");
+
+                    //make view for the topic search filter visible
+                    mTopicSearchFilterLayout.setVisibility(View.VISIBLE);
+
+                    mNewsFeedFilterView.setVisibility(View.GONE);
+                    mWorldTrendingFilterView.setVisibility(View.GONE);
+                    mCountryNewsFilterLayout.setVisibility(View.GONE);
                 }
                 else //its country news
                 {
+                    //set the text for the filter button
                     mFilterButton.setText("Filter: Country News");
 
+                    //make the view for the country news visible
+                    mCountryNewsFilterLayout.setVisibility(View.VISIBLE);
+
+                    mNewsFeedFilterView.setVisibility(View.GONE);
+                    mWorldTrendingFilterView.setVisibility(View.GONE);
+                    mTopicSearchFilterLayout.setVisibility(View.GONE);
+
                 }
+
+                //make submit and cancel buttons appear
+                mSubmitCancelFilterView.setVisibility(View.VISIBLE);
 
                 return true;
             }
@@ -273,7 +538,8 @@ public class NewsActivity extends AppCompatActivity {
     void filtersOnClickListeners()
     {
         //news feed filter listeners
-        mNewsFeedLanguages.setOnClickListener((View view) -> {newsFeedFilterLanguageClick();});
+        mNewsFeedLanguages.setOnClickListener((View view) -> {
+            filterLanguageClick(newsFeedSelectedLanguages, newsFeedLanguages, mNewsFeedLanguages);});
         mNewsFeedSort.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(RadioGroup sortGroup, int checkedSort)
@@ -282,7 +548,7 @@ public class NewsActivity extends AppCompatActivity {
                 RadioButton selectedSorting = (RadioButton) sortGroup.findViewById(checkedSort);
 
                 //get the text of the selected id
-                mSelectedSorting = selectedSorting.getText().toString().toLowerCase();
+                mSelectedNewsFeedSorting = selectedSorting.getText().toString().toLowerCase();
             }
         });
         mNewsFeedSentiment.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
@@ -293,37 +559,105 @@ public class NewsActivity extends AppCompatActivity {
                 RadioButton selectedSentiment = (RadioButton) sentimentGroup.findViewById(checkedSentiment);
 
                 //get the text
-                mSelectedSentiment = selectedSentiment.getText().toString().toLowerCase();
+                mSelectedNewsFeedSentiment = selectedSentiment.getText().toString().toLowerCase();
 
             }
         });
-        mSubmitNewsFeedFilter.setOnClickListener((View view) -> {submitNewsFeedFilter();});
-        mCancelNewsFeedFilter.setOnClickListener((View view) -> {mNewsFeedView.setVisibility(View.GONE);});
+
+        //world trending listeners
+        mWorldTrendingLanguages.setOnClickListener((View view) -> {
+            filterLanguageClick(worldTrendingSelectedLanguages, worldTrendingLanguages, mWorldTrendingLanguages);
+        });
+
+        //topic search listeners
+        mTopicSearchLanguages.setOnClickListener((View view) -> {
+            filterLanguageClick(topicSearchSelectedLanguages, topicSearchLanguages, mTopicSearchLanguages);
+        });
+
+        mTopicSearchSorting.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(RadioGroup sortingGroup, int checkedSorting) {
+
+                //get the selected radiobutton
+                RadioButton selectedSorting = (RadioButton) sortingGroup.findViewById(checkedSorting);
+
+                //get the text
+                mSelectedTopicSearchSorting = selectedSorting.getText().toString().toLowerCase();
+
+            }
+        });
+
+        //country news listeners
+        mCountryNewsLanguages.setOnClickListener((View view) -> {
+            filterLanguageClick(countryNewsSelectedLanguages, countryNewsLanguages, mCountryNewsLanguages);
+        });
+
+        mCountryNewsInternational.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(RadioGroup internationalGroup, int checkedChoice) {
+
+                //get the selected group
+                RadioButton selectedChoice = (RadioButton) internationalGroup.findViewById(checkedChoice);
+
+                //get the text
+                mCountryNewsInternationalSelected = selectedChoice.getText().toString().toLowerCase();
+
+            }
+        });
+
+        mCountryNewsSource.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                mFromCountrySelected = adapterView.getItemAtPosition(i).toString();
+               //Log.i(TAG, "filtersOnClickListeners() => country news source selected: " + mFromCountrySelected);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+
+            }
+        });
+
+        mCountryNewsAbout.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                mAboutCountrySelected = adapterView.getItemAtPosition(i).toString();
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+
+            }
+        });
+
+        //filter submit and cancel
+        mSubmitFilter.setOnClickListener((View view) -> { handleSubmitFilter(); });
+        mCancelFilter.setOnClickListener((View view) -> { hideFilterViews();});
     }
 
-    //functions for news feed filtering
-    private void newsFeedFilterLanguageClick()
+    //functions for language filtering
+    private void filterLanguageClick(boolean[] selectedLanguages, ArrayList<Integer> languages, TextView selectedLanguagesView)
     {
         AlertDialog.Builder newsFeedLanguageBuilder = new AlertDialog.Builder(NewsActivity.this);
 
         newsFeedLanguageBuilder.setTitle("Choose languages");
         newsFeedLanguageBuilder.setCancelable(false);
 
-        newsFeedLanguageBuilder.setMultiChoiceItems(Globals.languages, newsFeedSelectedLanguages, new DialogInterface.OnMultiChoiceClickListener() {
+        newsFeedLanguageBuilder.setMultiChoiceItems(Globals.languages, selectedLanguages, new DialogInterface.OnMultiChoiceClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i, boolean checkboxSelected)
             {
                 if (checkboxSelected)
                 {
                     //when checkbox selected, add position in lang list
-                    newsFeedLanguages.add(i);
+                    languages.add(i);
                     //sort arraylist
-                    Collections.sort(newsFeedLanguages);
+                    Collections.sort(languages);
                 }
                 else
                 {
                     //when checkbox is unselected, remove position from list
-                    newsFeedLanguages.remove(i);
+                    languages.remove(Integer.valueOf(i));
                 }
             }
         });
@@ -336,20 +670,20 @@ public class NewsActivity extends AppCompatActivity {
                 //initialize string builder
                 StringBuilder stringBuilder = new StringBuilder();
 
-                for(int j = 0; j < newsFeedLanguages.size(); j++)
+                for(int j = 0; j < languages.size(); j++)
                 {
                     //concatenate choices
-                    stringBuilder.append(Globals.languages[newsFeedLanguages.get(j)]);
+                    stringBuilder.append(Globals.languages[languages.get(j)]);
 
                     //add comma
-                    if(j != newsFeedLanguages.size() - 1)
+                    if(j != languages.size() - 1)
                     {
                         stringBuilder.append(", ");
                     }
                 }
 
                 //set the textview
-                mNewsFeedLanguages.setText(stringBuilder.toString());
+                selectedLanguagesView.setText(stringBuilder.toString());
 
             }
         });
@@ -368,13 +702,13 @@ public class NewsActivity extends AppCompatActivity {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
                 // use for loop
-                for (int j = 0; j < newsFeedSelectedLanguages.length; j++) {
+                for (int j = 0; j < selectedLanguages.length; j++) {
                     // remove all selection
-                    newsFeedSelectedLanguages[j] = false;
+                    selectedLanguages[j] = false;
                     // clear language list
-                    newsFeedLanguages.clear();
+                    languages.clear();
                     // clear text view value
-                    mNewsFeedLanguages.setText("");
+                    selectedLanguagesView.setText("");
                 }
             }
         });
@@ -384,12 +718,49 @@ public class NewsActivity extends AppCompatActivity {
 
     }
 
-    //function to submit the news feed filter and make search
-    private void submitNewsFeedFilter()
+    private void hideFilterViews()
     {
-        //hide filter view
-        mNewsFeedView.setVisibility(View.GONE);
+        //set all filter views visibility to gone
+        mNewsFeedFilterView.setVisibility(View.GONE);
+        mWorldTrendingFilterView.setVisibility(View.GONE);
+        mTopicSearchFilterLayout.setVisibility(View.GONE);
+        mCountryNewsFilterLayout.setVisibility(View.GONE);
+        mSubmitCancelFilterView.setVisibility(View.GONE);
+    }
 
+    //function to submit the news feed filter and make search
+    private void handleSubmitFilter()
+    {
+        if(mNewsFeedFilterView.getVisibility() == View.VISIBLE)
+        {
+            //call news feed filter handler function
+            handleNewsFeedFilter();
+        }
+        else if(mWorldTrendingFilterView.getVisibility() == View.VISIBLE)
+        {
+            //call world trending filter handler function
+            handleWorldTrendingFilter();
+        }
+        else if (mTopicSearchFilterLayout.getVisibility() == View.VISIBLE)
+        {
+            //call topic search filter handler function
+            handleTopicSearchFiltering();
+        }
+        else if(mCountryNewsFilterLayout.getVisibility() == View.VISIBLE)
+        {
+            //call country news filter handler
+            Log.i(TAG, "Country news filter layout visible");
+            handleCountryNewsFiltering();
+        }
+
+        //hide the filter views
+        hideFilterViews();
+
+    }
+
+    //on submit for the news feed filter
+    private void handleNewsFeedFilter()
+    {
         //make an array of languages
         String languages = mNewsFeedLanguages.getText().toString().trim();
         String [] languagesArray = new String[0];
@@ -400,14 +771,14 @@ public class NewsActivity extends AppCompatActivity {
         }
         else
         {
-            Log.i(TAG, "submitNewsFeedFilter() => no language selected");
+            Log.i(TAG, "handleNewsFeedFilter() => no language selected");
         }
 
         //log to make sure of selections
         Log.i(TAG, "submitNewsFeedFilter() => " +
                 "{Languages: " + Arrays.toString(languagesArray)+ "}, " +
-                "{ Sorting: " + mSelectedSorting + "}, " +
-                "{Sentiment: " + mSelectedSentiment + "}");
+                "{ Sorting: " + mSelectedNewsFeedSorting + "}, " +
+                "{Sentiment: " + mSelectedNewsFeedSentiment + "}");
 
         //make and start the thread to search to the news feed
         String[] finalLanguagesArray = languagesArray;
@@ -419,7 +790,7 @@ public class NewsActivity extends AppCompatActivity {
 
                 try
                 {
-                    String newsFeedResults = apiClient.searchNewsFeed(finalLanguagesArray, mSelectedSorting, mSelectedSentiment);
+                    String newsFeedResults = apiClient.searchNewsFeed(finalLanguagesArray, mSelectedNewsFeedSorting, mSelectedNewsFeedSentiment);
                     ArrayList<NewsArticle> newsFeedArticles = new ArrayList<>();
                     newsFeedArticles.addAll(newsJSONParser.parseNewsResults(newsFeedResults));
 
@@ -434,22 +805,20 @@ public class NewsActivity extends AppCompatActivity {
 
                         mArticleCardItems.add(cardItem);
 
-
-
                     }
 
                     //notify that the data changed
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                mNewsRecyclerAdapter.notifyDataSetChanged();
-                            }
-                        });
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            mNewsRecyclerAdapter.notifyDataSetChanged();
+                        }
+                    });
 
                 }
                 catch (IOException exception)
                 {
-                    Log.e(TAG, "submitNewsFeed => failed to fetch news feed: " + exception);
+                    Log.e(TAG, "handleNewsFeedFilter => failed to fetch news feed: " + exception);
                 }
             }
         };
@@ -459,7 +828,235 @@ public class NewsActivity extends AppCompatActivity {
 
     }
 
+    //on submit for the world trending filter
+    private void handleWorldTrendingFilter()
+    {
+        //make an array of languages
+        String worldTrendingLanguages = mWorldTrendingLanguages.getText().toString().trim();
+        String [] worldTrendingLanguagesArray = new String[0];
 
+        if(!worldTrendingLanguages.isEmpty() || worldTrendingLanguages != null)
+        {
+            worldTrendingLanguagesArray = worldTrendingLanguages.split(", ");
+        }
+        else
+        {
+            Log.i(TAG, "submitNewsFeedFilter() => no language selected");
+        }
 
+        //log to make sure of selections
+        Log.i(TAG, "handleWorldTrendingFilter() => " +
+                "{Languages: " + Arrays.toString(worldTrendingLanguagesArray));
+
+        //make and start a thread to search for world trending news
+        String[] finalWorldTrendingLanguagesArray = worldTrendingLanguagesArray;
+
+        Thread getWorldTrendingNews = new Thread()
+        {
+            @Override
+            public void run() {
+                super.run();
+
+                try
+                {
+                    //TODO: call api helper function to get world trending news
+                    String worldTrendingResults = apiClient.searchWorldTrending(finalWorldTrendingLanguagesArray);
+
+                    //parse the results
+                    ArrayList<NewsArticle> worldTrendingArticles = new ArrayList<>();
+                    worldTrendingArticles.addAll(newsJSONParser.parseWorldTrendingResults(worldTrendingResults));
+
+                    //clear recycler adapter
+                    mArticleCardItems.clear();
+
+                    //Add articles to recycler adapter
+                    for(NewsArticle worldTrendArticle: worldTrendingArticles)
+                    {
+                        ArticleCardItem worldTrendCardItem = new ArticleCardItem(worldTrendArticle.getTitle(), worldTrendArticle.getTopic(), worldTrendArticle.getSummary(),
+                                worldTrendArticle.getPublisher(), worldTrendArticle.getDatePublished(), worldTrendArticle.getLink());
+
+                        mArticleCardItems.add(worldTrendCardItem);
+
+                    }
+
+                    //notify that the data changed
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            mNewsRecyclerAdapter.notifyDataSetChanged();
+                        }
+                    });
+                }
+                catch (IOException exception)
+                {
+                    Log.e(TAG, "handleWorldTrendingFilter => failed to fetch news feed: " + exception);
+                }
+            }
+        };
+
+        //start the thread
+        getWorldTrendingNews.start();
+
+    }
+
+    //on submit for topic search
+    private void handleTopicSearchFiltering()
+    {
+        String topic = mNewsSearchBar.getQuery().toString().trim();
+
+        if(!topic.isEmpty() && topic != null)
+        {
+            String[] topicArray = topic.split(" ");
+
+            //get the languages
+            String topicSearchLanguages = mTopicSearchLanguages.getText().toString().trim();
+            String[] topicSearchLanguagesArray = new String[0];
+
+            if(!topicSearchLanguages.isEmpty() && topicSearchLanguages != null)
+            {
+                topicSearchLanguagesArray = topicSearchLanguages.split("' ");
+            }
+            else
+            {
+                topicSearchLanguagesArray[0] = "English";
+            }
+
+            String[] finalTopicArray = topicArray;
+            String[] finalTopicSearchLanguages = topicSearchLanguagesArray;
+
+            Thread topicSearchThread = new Thread()
+            {
+                @Override
+                public void run() {
+                    super.run();
+
+                    try {
+
+                        String topicSearchResult = apiClient.searchTopic(finalTopicArray, finalTopicSearchLanguages, mSelectedTopicSearchSorting);
+
+                        //get the articles
+                        ArrayList<NewsArticle> topicSearchArticles = new ArrayList<>();
+                        topicSearchArticles.addAll(newsJSONParser.parseNewsResults(topicSearchResult));
+
+                        //clear recycler adapter
+                        mArticleCardItems.clear();
+
+                        //Add articles to recycler adapter
+                        for(NewsArticle topiSearchArticle: topicSearchArticles)
+                        {
+                            ArticleCardItem topicSearchCardItem = new ArticleCardItem(topiSearchArticle.getTitle(), topiSearchArticle.getTopic(), topiSearchArticle.getSummary(),
+                                    topiSearchArticle.getPublisher(), topiSearchArticle.getDatePublished(), topiSearchArticle.getLink());
+
+                            mArticleCardItems.add(topicSearchCardItem);
+
+                        }
+
+                        //notify that the data changed
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                mNewsRecyclerAdapter.notifyDataSetChanged();
+                            }
+                        });
+                        
+                    }catch (IOException e)
+                    {
+                        Log.e(TAG, "handleTopicSearchFiltering() => failed to search topic '" + topic + ",: " + e);
+                    }
+                }
+            };
+
+            topicSearchThread.run();
+
+        }
+        else
+        {
+            //make alert dialog for empty search bar
+            AlertDialog.Builder emptySearchbar = new AlertDialog.Builder(NewsActivity.this);
+
+            emptySearchbar.setTitle("Empty Search Field");
+            emptySearchbar.setMessage("Please enter a query into the search bar");
+            emptySearchbar.setIcon(R.drawable.ic_action_warning);
+            emptySearchbar.setCancelable(true);
+            emptySearchbar.setPositiveButton("OK", null);
+            emptySearchbar.show();
+        }
+
+    }
+
+    //handle country news filtering
+    private void handleCountryNewsFiltering()
+    {
+        String countryFilterLanguages = mCountryNewsLanguages.getText().toString();
+        String[] countryFilterLanguagesArray = new String[0];
+
+        if(countryFilterLanguages.isEmpty() || countryFilterLanguages == null)
+        {
+            countryFilterLanguagesArray[0] = "English";
+        }
+        else
+        {
+            countryFilterLanguagesArray = countryFilterLanguages.split(", ");
+        }
+
+        String[] finalCountryFilterLanguagesArray = countryFilterLanguagesArray;
+        String fromCountry = Globals.countryCodes.get(mFromCountrySelected);
+        String aboutCountry = Globals.countryCodes.get(mAboutCountrySelected);
+        String onlyInternational = "";
+        if(mCountryNewsInternationalSelected.equals("yes"))
+        {
+            onlyInternational = "true";
+        }
+        else if(mCountryNewsInternationalSelected.equals("no"))
+        {
+            onlyInternational = "false";
+        }
+
+        String finalOnlyInternational = onlyInternational;
+        Thread countryNewsThread = new Thread()
+        {
+            @Override
+            public void run() {
+                super.run();
+
+                try {
+
+                    String countryNewsResult = apiClient.countryNews(finalCountryFilterLanguagesArray, fromCountry, aboutCountry, finalOnlyInternational);
+
+                    //get the articles
+                    ArrayList<NewsArticle> countryNewsArticles = new ArrayList<>();
+                    countryNewsArticles.addAll(newsJSONParser.parseNewsResults(countryNewsResult));
+
+                    //clear recycler adapter
+                    mArticleCardItems.clear();
+
+                    //Add articles to recycler adapter
+                    for(NewsArticle countryNews: countryNewsArticles)
+                    {
+                        ArticleCardItem countryNewsCardItem = new ArticleCardItem(countryNews.getTitle(), countryNews.getTopic(), countryNews.getSummary(),
+                                countryNews.getPublisher(), countryNews.getDatePublished(), countryNews.getLink());
+
+                        mArticleCardItems.add(countryNewsCardItem);
+
+                    }
+
+                    //notify that the data changed
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            mNewsRecyclerAdapter.notifyDataSetChanged();
+                        }
+                    });
+
+                }catch (IOException e)
+                {
+                    Log.e(TAG, "handleCountryNewsFiltering() => failed to get country news: " + e);
+                }
+            }
+        };
+
+        countryNewsThread.start();
+
+    }
 
 }

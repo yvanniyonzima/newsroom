@@ -37,8 +37,12 @@ public class FirebaseDatabaseHelper {
         {
             Log.i(TAG, "saveUser(): user is null");
         }
+        else
+        {
+            Log.i(TAG, "saveUser(): saving user " + user.getUserName() + " to reference " + mUserReference.toString());
+        }
 
-        Log.i(TAG, "saveUser(): saving user " + user.getUserName() + " to reference " + mUserReference.toString());
+
 
         return mUserReference.child(user.getUserName()).setValue(user);
     }
@@ -53,6 +57,25 @@ public class FirebaseDatabaseHelper {
     //READ ALL USER NEWS ARTICLES
 
     //SAVE LIKED NEWS ARTICLES
+    public Task<Void> saveArticle(NewsArticle article, String userName)
+    {
+        DatabaseReference articleReference = mDatabase.getReference("users/" + userName + "/likedArticles");
+        if(article == null)
+        {
+            Log.i(TAG, "saveArticle(): article is null");
+
+        }
+        else
+        {
+            Log.i(TAG, "saveArticle(): saving article " + article.getTitle() + " to reference " + article.toString());
+        }
+
+        return articleReference.push().setValue(article);
+
+    }
+
+    //GET LIKED NEWS ARTICLES
+
 
     //DELETE NEWS ARTICLE
 
