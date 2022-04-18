@@ -1,5 +1,6 @@
 package comp4905.newsroom.Classes;
 
+import java.util.ArrayList;
 import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -8,6 +9,7 @@ import java.util.stream.Stream;
 public class Globals {
     //this is the information of the user logged into this device
     public static User deviceUser;
+    public static ArrayList<NewsArticle> userLikedArticles = new ArrayList<>();
 
     //these are all the topics that the user an choose from and will be used to filter searches
     public static String[] topics = {"News", "Sport", "Tech", "World", "Finance", "Politics",

@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
@@ -15,13 +16,20 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.PopupMenu;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.Task;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import comp4905.newsroom.Classes.FirebaseDatabaseHelper;
 import comp4905.newsroom.Classes.Globals;
 import comp4905.newsroom.R;
 
@@ -47,6 +55,9 @@ public class ProfileActivity extends AppCompatActivity {
     private ListView mOtherTopicsListView;
     private ArrayList<String> mOtherTopics;
     private ArrayAdapter mOtherTopicsArrayAdapter;
+
+    //for firebase CRUD
+    private FirebaseDatabaseHelper mDatabaseHelper = new FirebaseDatabaseHelper();
 
     private String[] topics = {"News", "Sport", "Technology", "World", "Finance", "Politics",
             "Business", "Economics", "Entertainment", "Beauty", "Gaming"};
@@ -121,7 +132,22 @@ public class ProfileActivity extends AppCompatActivity {
             //exit from topics edit mode
             editTopicsMode(false);
 
-            //TODO: save new password to firebase
+            //TODO: save new favorites to firebase
+            mDatabaseHelper.updateFavoriteTopic(Globals.deviceUser.getUserName(), mTopics).addOnCompleteListener(new OnCompleteListener<Void>() {
+                @Override
+                public void onComplete(@NonNull Task<Void> task) {
+                    if(task.isSuccessful())
+                    {
+                        Toast.makeText(ProfileActivity.this, "Favorite updated Successfully!", Toast.LENGTH_SHORT).show();
+                        Log.i(TAG, "doneAddingTopics() => Successfully Updated favorite topics");
+                    }
+                }
+            }).addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+                    Log.e(TAG, "doneAddingTopics() => Failed to update favorite topics");
+                }
+            });
         });
 
         //onclick for change password
@@ -302,7 +328,21 @@ public class ProfileActivity extends AppCompatActivity {
                 if(newPassword.equals(confirmNewPassword))
                 {
                     changePassMessage.setText("Passwords match!");
-                    //TODO: update user firebase with new password
+                    mDatabaseHelper.savePassword(Globals.deviceUser.getUserName(), newPassword).addOnCompleteListener(new OnCompleteListener<Void>() {
+                        @Override
+                        public void onComplete(@NonNull Task<Void> task) {
+                            if(task.isSuccessful())
+                            {
+                                Toast.makeText(ProfileActivity.this, "Password updates Successfully!", Toast.LENGTH_SHORT).show();
+                                Log.i(TAG, "changePassword() => Successfully Changed Password");
+                            }
+                        }
+                    }).addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Log.e(TAG, "changePassword() => Failed to save new password!");
+                        }
+                    });
                 }
                 else
                 {

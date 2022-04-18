@@ -20,6 +20,7 @@ import java.util.ArrayList;
 
 import comp4905.newsroom.Classes.FirebaseDatabaseHelper;
 import comp4905.newsroom.Classes.Globals;
+import comp4905.newsroom.Classes.NewsArticle;
 import comp4905.newsroom.Classes.User;
 import comp4905.newsroom.R;
 
@@ -120,17 +121,19 @@ public class LoginActivity extends AppCompatActivity {
                             Log.i(TAG, "login(): password DOES NOT match");
                             loginErrorTextview.setText("Invalid username or password. Please try again!");
                         }
+
+                        retrieveLikedArticles(username);
                     }
                     else
                     {
                         //user does not exists
-                        Log.i(TAG, "login(): user " + username + " NOT found");
+                        Log.e(TAG, "login(): user " + username + " NOT found");
                         loginErrorTextview.setText("Invalid username or password. Please try again!");
                     }
                 }
                 else
                 {
-                    Log.i(TAG, "login(): failed to get user " + username);
+                    Log.e(TAG, "login(): failed to get user " + username);
                     loginErrorTextview.setText("Invalid username or password. Please try again!");
                 }
             }
@@ -138,7 +141,52 @@ public class LoginActivity extends AppCompatActivity {
         }).addOnFailureListener(new OnFailureListener() {
             @Override
             public void onFailure(@NonNull Exception e) {
-                Log.i(TAG, "login(): failed to get user " + username);
+                Log.e(TAG, "login(): failed to get user " + username);
+            }
+        });
+    }
+
+    private void retrieveLikedArticles(String username)
+    {
+        mDatabseHelper.getArticles(username).addOnCompleteListener(new OnCompleteListener<DataSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DataSnapshot> task) {
+                Log.i(TAG, "retrieveLikedArticles() => retrieve user articles task complete");
+                if(task.isSuccessful())
+                {
+                    if(task.getResult().exists())
+                    {
+                        Log.i(TAG, "retrieveLikedArticles() => articles for " + username + " found");
+
+                        DataSnapshot articleSnapshot = task.getResult();
+
+                         Iterable<DataSnapshot> iterableArticles = articleSnapshot.getChildren();
+
+                         for(DataSnapshot article: iterableArticles)
+                         {
+                             String author = String.valueOf(article.child("author").getValue());
+                             String country = String.valueOf(article.child("country").getValue());
+                             String published = String.valueOf(article.child("datePublished").getValue());
+                             String language = String.valueOf(article.child("language").getValue());
+                             String link = String.valueOf(article.child("link").getValue());
+                             String mediaLink = String.valueOf(article.child("mediaLink").getValue());
+                             String publisher = String.valueOf(article.child("publisher").getValue());
+                             String summary = String.valueOf(article.child("summary").getValue());
+                             String title = String.valueOf(article.child("title").getValue());
+                             String topic = String.valueOf(article.child("topic").getValue());
+                             NewsArticle tempArticle = new NewsArticle(title, author, published, link, summary, topic,
+                                                                        mediaLink, publisher, country, language);
+
+                             Log.i(TAG, "retrieveLikedArticles() => " + tempArticle);
+                             Globals.userLikedArticles.add(tempArticle);
+                         }
+                    }
+                }
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Log.e(TAG, "retrieveLikedArticles(): failed to get liked articles for " + username);
             }
         });
     }

@@ -102,7 +102,8 @@ public class NewsActivity extends AppCompatActivity {
     private ArrayList<NewsArticle> mArticles = new ArrayList<>();
 
     private ArrayList<ArticleCardItem> mLikedArticleCardItems = new ArrayList<>();
-    private ArrayList<NewsArticle> mLikedArticles = new ArrayList<>();
+    //using globals.userLikedArticles
+    //private ArrayList<NewsArticle> mLikedArticles = new ArrayList<>();
 
     private boolean[] newsFeedSelectedLanguages = new boolean[Globals.languages.length];
     private ArrayList<Integer> newsFeedLanguages = new ArrayList<>();
@@ -152,20 +153,23 @@ public class NewsActivity extends AppCompatActivity {
                     //Add articles to recycler adapter
                     for(NewsArticle article: mArticles)
                     {
-                        ArticleCardItem cardItem = new ArticleCardItem(article.getTitle(), article.getTopic(), article.getSummary(),
-                                                                    article.getPublisher(), article.getDatePublished(), article.getLink());
+                        if(!articleIsLiked(article.getLink()))
+                        {
+                            ArticleCardItem cardItem = new ArticleCardItem(article.getTitle(), article.getTopic(), article.getSummary(),
+                                    article.getPublisher(), article.getDatePublished(), article.getLink());
 
-                        mArticleCardItems.add(cardItem);
-
-                        //build recyclerview
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                buildNewsRecyclerView();
-                            }
-                        });
+                            mArticleCardItems.add(cardItem);
+                        }
 
                     }
+
+                    //build recyclerview
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            buildNewsRecyclerView();
+                        }
+                    });
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -319,7 +323,7 @@ public class NewsActivity extends AppCompatActivity {
             public void onLikeClick(int position) {
                 //TODO: save the article to liked article card item to liked article the users firebase
 
-                mLikedArticles.add(mArticles.get(position));
+                Globals.userLikedArticles.add(mArticles.get(position));
                 mLikedArticleCardItems.add(mArticleCardItems.get(position));
 
                 //save to firebase
@@ -346,9 +350,9 @@ public class NewsActivity extends AppCompatActivity {
                 mNewsRecyclerAdapter.notifyDataSetChanged();
                 mLikedNewsRecyclerAdapter.notifyDataSetChanged();
 
-                if(mLikedArticles.size() > 0)
+                if(Globals.userLikedArticles.size() > 0)
                 {
-                    String likesText = "Likes: " + mLikedArticles.size();
+                    String likesText = "Likes: " + Globals.userLikedArticles.size();
                     mLikes.setText(likesText);
                 }
                 else
@@ -410,24 +414,30 @@ public class NewsActivity extends AppCompatActivity {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
 
-                        mArticles.add(mLikedArticles.get(position));
+                        String urlDeleted = Globals.userLikedArticles.get(position).getLink();
+
+                        mArticles.add(Globals.userLikedArticles.get(position));
+
                         mArticleCardItems.add(mLikedArticleCardItems.get(position));
 
-                        mLikedArticles.remove(position);
+                        Globals.userLikedArticles.remove(position);
                         mLikedArticleCardItems.remove(position);
 
                         mLikedNewsRecyclerAdapter.notifyDataSetChanged();
                         mNewsRecyclerAdapter.notifyDataSetChanged();
 
-                        if(mLikedArticles.size() > 0)
+                        if(Globals.userLikedArticles.size() > 0)
                         {
-                            String likesText = "Likes: " + mLikedArticles.size();
+                            String likesText = "Likes: " + Globals.userLikedArticles.size();
                             mLikes.setText(likesText);
                         }
                         else
                         {
                             mLikes.setText("Likes");
                         }
+
+                        //delete the article from firebase
+                        mDatabaseHelper.deleteArticle(Globals.deviceUser.getUserName(), urlDeleted);
                     }
                 });
 
@@ -439,18 +449,35 @@ public class NewsActivity extends AppCompatActivity {
                 });
 
                 deleteArticleAlert.show();
-
-
             }
         });
+
+        //populate the liked articles recycler with globals.userLikedArticles
+        if(Globals.userLikedArticles.size() > 0)
+        {
+            for(NewsArticle article : Globals.userLikedArticles)
+            {
+                ArticleCardItem tempArticleItem = new ArticleCardItem(article.getTitle(), article.getTopic(), article.getSummary(),
+                                                                    article.getPublisher(), article.getDatePublished(), article.getLink());
+                mLikedArticleCardItems.add(tempArticleItem);
+            }
+
+            Log.i(TAG, "BuildRecyclerView() => size of liked articles card item: " + mLikedArticleCardItems.size());
+
+            mLikes.setText("Likes: " + Globals.userLikedArticles.size());
+
+            //notify the recycler view
+            mLikedNewsRecyclerAdapter.notifyDataSetChanged();
+        }
 
     }
 
     private boolean articleIsLiked(String url)
     {
-        for(int i = 0; i < mLikedArticles.size(); i++)
+        for(NewsArticle article: Globals.userLikedArticles)
         {
-            if(mLikedArticles.get(i).getLink().equals(url))
+            //Log.i(TAG, "articleIsLiked() => comparing " + url + " to" + article.getLink());
+            if(article.getLink().equals(url))
             {
                 return true;
             }
@@ -458,7 +485,6 @@ public class NewsActivity extends AppCompatActivity {
 
         return false;
     }
-
 
 
     //function to show menu of filtering options
@@ -800,10 +826,15 @@ public class NewsActivity extends AppCompatActivity {
                     //Add articles to recycler adapter
                     for(NewsArticle article: newsFeedArticles)
                     {
-                        ArticleCardItem cardItem = new ArticleCardItem(article.getTitle(), article.getTopic(), article.getSummary(),
-                                article.getPublisher(), article.getDatePublished(), article.getLink());
+                        //show the articles that are not liked
+                        if(!articleIsLiked(article.getLink()))
+                        {
+                            ArticleCardItem cardItem = new ArticleCardItem(article.getTitle(), article.getTopic(), article.getSummary(),
+                                    article.getPublisher(), article.getDatePublished(), article.getLink());
 
-                        mArticleCardItems.add(cardItem);
+                            mArticleCardItems.add(cardItem);
+                        }
+
 
                     }
 
@@ -869,13 +900,17 @@ public class NewsActivity extends AppCompatActivity {
                     //clear recycler adapter
                     mArticleCardItems.clear();
 
-                    //Add articles to recycler adapter
+                    //Add articles to recycler adapter: ONLY THOSE THAT ARE NOT LIKED
+
                     for(NewsArticle worldTrendArticle: worldTrendingArticles)
                     {
-                        ArticleCardItem worldTrendCardItem = new ArticleCardItem(worldTrendArticle.getTitle(), worldTrendArticle.getTopic(), worldTrendArticle.getSummary(),
-                                worldTrendArticle.getPublisher(), worldTrendArticle.getDatePublished(), worldTrendArticle.getLink());
+                        if(!articleIsLiked(worldTrendArticle.getLink()))
+                        {
+                            ArticleCardItem worldTrendCardItem = new ArticleCardItem(worldTrendArticle.getTitle(), worldTrendArticle.getTopic(), worldTrendArticle.getSummary(),
+                                    worldTrendArticle.getPublisher(), worldTrendArticle.getDatePublished(), worldTrendArticle.getLink());
 
-                        mArticleCardItems.add(worldTrendCardItem);
+                            mArticleCardItems.add(worldTrendCardItem);
+                        }
 
                     }
 
@@ -941,14 +976,16 @@ public class NewsActivity extends AppCompatActivity {
                         //clear recycler adapter
                         mArticleCardItems.clear();
 
-                        //Add articles to recycler adapter
+                        //Add articles to recycler adapter: ONLY THOSE THAT ARE NOT LIKED
                         for(NewsArticle topiSearchArticle: topicSearchArticles)
                         {
-                            ArticleCardItem topicSearchCardItem = new ArticleCardItem(topiSearchArticle.getTitle(), topiSearchArticle.getTopic(), topiSearchArticle.getSummary(),
-                                    topiSearchArticle.getPublisher(), topiSearchArticle.getDatePublished(), topiSearchArticle.getLink());
+                            if(!articleIsLiked(topiSearchArticle.getLink()))
+                            {
+                                ArticleCardItem topicSearchCardItem = new ArticleCardItem(topiSearchArticle.getTitle(), topiSearchArticle.getTopic(), topiSearchArticle.getSummary(),
+                                        topiSearchArticle.getPublisher(), topiSearchArticle.getDatePublished(), topiSearchArticle.getLink());
 
-                            mArticleCardItems.add(topicSearchCardItem);
-
+                                mArticleCardItems.add(topicSearchCardItem);
+                            }
                         }
 
                         //notify that the data changed
@@ -1030,13 +1067,16 @@ public class NewsActivity extends AppCompatActivity {
                     //clear recycler adapter
                     mArticleCardItems.clear();
 
-                    //Add articles to recycler adapter
+                    //Add articles to recycler adapter: ONLY THOSE THAT ARE NOT LIKED
                     for(NewsArticle countryNews: countryNewsArticles)
                     {
-                        ArticleCardItem countryNewsCardItem = new ArticleCardItem(countryNews.getTitle(), countryNews.getTopic(), countryNews.getSummary(),
-                                countryNews.getPublisher(), countryNews.getDatePublished(), countryNews.getLink());
+                        if(!articleIsLiked(countryNews.getLink()))
+                        {
+                            ArticleCardItem countryNewsCardItem = new ArticleCardItem(countryNews.getTitle(), countryNews.getTopic(), countryNews.getSummary(),
+                                    countryNews.getPublisher(), countryNews.getDatePublished(), countryNews.getLink());
 
-                        mArticleCardItems.add(countryNewsCardItem);
+                            mArticleCardItems.add(countryNewsCardItem);
+                        }
 
                     }
 
