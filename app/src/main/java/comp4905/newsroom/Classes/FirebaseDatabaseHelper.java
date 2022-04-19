@@ -25,6 +25,7 @@ public class FirebaseDatabaseHelper {
 
     private FirebaseDatabase mDatabase;
     private DatabaseReference mUserReference;
+    private DatabaseReference mGroupReference;
 
 
 
@@ -34,6 +35,7 @@ public class FirebaseDatabaseHelper {
         mDatabase = FirebaseDatabase.getInstance();
         //mDatabase.setPersistenceEnabled(true);
         mUserReference = mDatabase.getReference("users");
+        mGroupReference = mDatabase.getReference("chat_groups");
     }
 
     public Task<Void> saveUser(User user)
@@ -144,6 +146,18 @@ public class FirebaseDatabaseHelper {
         DatabaseReference favoritesReference = mDatabase.getReference("users/" + username + "/favorites");
 
         return favoritesReference.setValue(favorites);
+    }
+
+    //CREATE AND SAVE NEW MANUAL GROUP
+    public Task<Void> saveNewGroup(String groupName)
+    {
+        return mGroupReference.child(groupName).setValue("");
+    }
+
+    //RETRIEVE GROUPS NAMES
+    public DatabaseReference getGroups()
+    {
+        return mGroupReference;
     }
 
 

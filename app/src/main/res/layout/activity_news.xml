@@ -488,12 +488,12 @@
         android:id="@+id/filter_submit_cancel_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="@color/white"
         android:orientation="vertical"
-        app:layout_constraintBottom_toBottomOf="@+id/news_search_recyclerView"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
         android:visibility="gone"
-        android:background="@color/white">
+        app:layout_constraintBottom_toTopOf="@+id/filter_news_button"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"

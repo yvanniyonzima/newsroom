@@ -3,10 +3,12 @@ package comp4905.newsroom.Classes;
 import android.util.Log;
 
 import java.io.IOException;
+import java.util.Random;
 
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
+import okhttp3.internal.http.RealResponseBody;
 
 public class NewsAPIClient
 {
@@ -41,18 +43,37 @@ public class NewsAPIClient
         //add the language to the url (currently defaulted to english)
         fullURL += "languages=en";
 
-        //add the topic
-        fullURL += "&search=";
+        //indeces to choose from for initial search
+        int[] indeces = new int[Globals.deviceUser.getFavorites().size()];
         for(int i = 0; i < Globals.deviceUser.getFavorites().size(); i++)
         {
-            if (i == (Globals.deviceUser.getFavorites().size() - 1))
+            indeces[i] = i;
+        }
+
+        Random rand = new Random();
+        //add the topic
+        fullURL += "&search=";
+        int searchStringLength = 0;
+        for(int i = 0; i < Globals.deviceUser.getFavorites().size(); i++)
+        {
+            int randomIndex = rand.nextInt(indeces.length);
+            searchStringLength +=  Globals.deviceUser.getFavorites().get(randomIndex).length() + 1;
+
+            if(searchStringLength > 24)
             {
-                //last topic
-                fullURL += Globals.deviceUser.getFavorites().get(i).toLowerCase();
+                break;
             }
             else
             {
-                fullURL += Globals.deviceUser.getFavorites().get(i).toLowerCase() + "%20";
+                //first topic added to url
+                if((searchStringLength - Globals.deviceUser.getFavorites().get(randomIndex).length()) == 0)
+                {
+                    fullURL += Globals.deviceUser.getFavorites().get(i).toLowerCase();
+                }
+                else
+                {
+                    fullURL += "%20" + Globals.deviceUser.getFavorites().get(i).toLowerCase();
+                }
             }
 
         }
@@ -60,7 +81,7 @@ public class NewsAPIClient
         //add a batch size of 30 for every reload
         fullURL += "&batchSize=30";
 
-        Log.i(TAG,"searchNews() => Request: " + fullURL);
+        Log.i(TAG,"searchUserPreferredNews() => Request: " + fullURL);
 
         //build the request
         request = new Request.Builder()
@@ -279,7 +300,7 @@ public class NewsAPIClient
         response = okHttpClient.newCall(request).execute();
 
         //convert response to json String
-        String responseString = response.body().toString();
+        String responseString = response.body().string();
 
         Log.i(TAG,"searchTopic() => Response:" + responseString);
 
@@ -337,7 +358,7 @@ public class NewsAPIClient
         response = okHttpClient.newCall(request).execute();
 
         //convert response to json String
-        String responseString = response.body().toString();
+        String responseString = response.body().string();
 
         Log.i(TAG,"countryNews() => Response:" + responseString);
 

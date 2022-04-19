@@ -6,11 +6,18 @@
         android:title="Profile"/>
     />
 
-    <item android:id="@+id/logout_menu_option"
-        android:title="Logout" />
+
+
+    <item android:id="@+id/new_group_menu_option"
+        android:title="New Group"/>
 
     <item android:id="@+id/about_menu_option"
         android:title="About"/>
-    />
-    />
+
+    <item android:id="@+id/logout_menu_option"
+        android:title="Logout" />
+
+
+
+
 </menu>

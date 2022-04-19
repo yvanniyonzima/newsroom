@@ -1,5 +1,6 @@
 package comp4905.newsroom.Activities;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -9,6 +10,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
@@ -16,6 +18,7 @@ import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.PopupMenu;
@@ -25,6 +28,10 @@ import android.widget.SearchView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.Task;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -264,9 +271,14 @@ public class NewsActivity extends AppCompatActivity {
                     //TODO: Pass the user information in the intent
                     startActivity(userProfileIntent);
                 }
+                else if (menuItem.getItemId() == R.id.new_group_menu_option)
+                {
+                    //TODO:create new group
+                    requestNewManualGroup();
+                }
                 else
                 {
-                    //TODO:Logout
+                    //TODO: logout
                 }
                 return true;
             }
@@ -275,10 +287,66 @@ public class NewsActivity extends AppCompatActivity {
         mainMenu.show();
     }
 
-    //when an item is liked, it is removed from the list
-    public void removeItem(int position) {
-        mArticleCardItems.remove(position);
-        mNewsRecyclerAdapter.notifyItemRemoved(position);
+    //function to create a new group
+    private void requestNewManualGroup()
+    {
+        AlertDialog.Builder newGroupBuilder = new AlertDialog.Builder(NewsActivity.this);
+
+        newGroupBuilder.setTitle("Enter Group Name : ");
+
+        final EditText groupNameField = new EditText(NewsActivity.this);
+        groupNameField.setHint("e.g: Cyber truck news");
+        newGroupBuilder.setView(groupNameField);
+
+        newGroupBuilder.setPositiveButton("Create", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                String groupName = groupNameField.getText().toString();
+
+                if (TextUtils.isEmpty(groupName))
+                {
+                    Toast.makeText(NewsActivity.this, "Please Write Group Name", Toast.LENGTH_LONG);
+                }
+                else
+                {
+                    createNewGroup(groupName);
+                }
+            }
+        });
+
+        newGroupBuilder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                dialogInterface.cancel();
+
+
+            }
+        });
+
+        newGroupBuilder.show();
+
+    }
+
+    private void createNewGroup(String groupName)
+    {
+        mDatabaseHelper.saveNewGroup(groupName).addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+                if(task.isSuccessful())
+                {
+                    Toast.makeText(NewsActivity.this, groupName + " is created successfully", Toast.LENGTH_SHORT);
+                    Log.i(TAG, "createNewGroup() => group name " + groupName + " created successfully");
+                }
+
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Toast.makeText(NewsActivity.this, groupName + " failed to created", Toast.LENGTH_SHORT);
+                Log.e(TAG, "createNewGroup() => group name " + groupName + " was not created");
+                Log.e(TAG, "createNewGroup() => : " + e);
+            }
+        });
     }
 
     //function to build the recycler view
@@ -782,6 +850,12 @@ public class NewsActivity extends AppCompatActivity {
         //hide the filter views
         hideFilterViews();
 
+        //show search recycler
+        mNewsRecyclerView.setVisibility(View.VISIBLE);
+
+        //hide likes recycler
+        mLikedNewsRecycleView.setVisibility(View.GONE);
+
     }
 
     //on submit for the news feed filter
@@ -1003,7 +1077,7 @@ public class NewsActivity extends AppCompatActivity {
                 }
             };
 
-            topicSearchThread.run();
+            topicSearchThread.start();
 
         }
         else
