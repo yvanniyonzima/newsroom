@@ -160,5 +160,24 @@ public class FirebaseDatabaseHelper {
         return mGroupReference;
     }
 
+    //GET A NEW MESSAGE KEY
+    public String getNewMessageKey(String groupName)
+    {
+        return mGroupReference.child(groupName).push().getKey();
+
+    }
+
+    //SAVE GROUP MASSAGE
+    public Task<Void> saveMessage(Message message, String groupName)
+    {
+        return mGroupReference.child(groupName).child(message.getKey()).setValue(message);
+    }
+
+    //RETRIEVE MESSAGES FOR GROUPS
+    public DatabaseReference getGroupMessages(String groupName)
+    {
+        return mGroupReference.child(groupName);
+    }
+
 
 }

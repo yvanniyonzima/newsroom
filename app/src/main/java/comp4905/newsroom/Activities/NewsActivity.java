@@ -147,7 +147,10 @@ public class NewsActivity extends AppCompatActivity {
         //filter items click listeners
         filtersOnClickListeners();
 
-        //get latest news by with users categories
+        //build the recycler view
+        buildNewsRecyclerView();
+
+        //get latest news with users categories
         Thread newsThread = new Thread()
         {
             @Override
@@ -187,10 +190,54 @@ public class NewsActivity extends AppCompatActivity {
 
     }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+        //get latest news with users categories
+        Thread newsThread = new Thread()
+        {
+            @Override
+            public void run() {
+                super.run();
+                try {
+                    String responseString = apiClient.searchUserPreferredNews();
+                    mArticles.addAll(newsJSONParser.parseNewsResults(responseString));
+                    mArticleCardItems.clear();
+
+                    //Add articles to recycler adapter
+                    for(NewsArticle article: mArticles)
+                    {
+                        if(!articleIsLiked(article.getLink()))
+                        {
+                            ArticleCardItem cardItem = new ArticleCardItem(article.getTitle(), article.getTopic(), article.getSummary(),
+                                    article.getPublisher(), article.getDatePublished(), article.getLink());
+
+                            mArticleCardItems.add(cardItem);
+                        }
+
+                    }
+
+                    //notify of new data
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            mNewsRecyclerAdapter.notifyDataSetChanged();
+                        }
+                    });
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        };
+
+        newsThread.start();
+    }
+
     //function to inflate variable and filter views
     private void inflateVariables()
     {
-        mUserMenu = (ImageView) findViewById(R.id.user_menu);
+        mUserMenu = (ImageView) findViewById(R.id.chat_settings_menu);
         mNewsSearchBar = (SearchView) findViewById(R.id.news_search_bar);
         mSearchNewsButton = (Button) findViewById(R.id.news_search_button);
         mFilterButton = (Button) findViewById(R.id.filter_news_button);
@@ -271,6 +318,12 @@ public class NewsActivity extends AppCompatActivity {
                     //TODO: Pass the user information in the intent
                     startActivity(userProfileIntent);
                 }
+                else if(menuItem.getItemId() == R.id.group_chats_menu_option)
+                {
+                    Intent groupChatsIntent = new Intent(NewsActivity.this, GroupChatsActivity.class);
+                    startActivity(groupChatsIntent);
+
+                }
                 else if (menuItem.getItemId() == R.id.new_group_menu_option)
                 {
                     //TODO:create new group
@@ -350,7 +403,7 @@ public class NewsActivity extends AppCompatActivity {
     }
 
     //function to build the recycler view
-    public void buildNewsRecyclerView()
+    private void buildNewsRecyclerView()
     {
 
         //setup news recycler adapter
@@ -389,46 +442,8 @@ public class NewsActivity extends AppCompatActivity {
 
             @Override
             public void onLikeClick(int position) {
-                //TODO: save the article to liked article card item to liked article the users firebase
 
-                Globals.userLikedArticles.add(mArticles.get(position));
-                mLikedArticleCardItems.add(mArticleCardItems.get(position));
-
-                //save to firebase
-                mDatabaseHelper.saveArticle(mArticles.get(position), Globals.deviceUser.getUserName()).addOnSuccessListener(success ->
-                {
-                    Toast.makeText(NewsActivity.this, "Article Saved Successfully!", Toast.LENGTH_SHORT).show();
-
-                    if(success != null)
-                    {
-                        Log.i(TAG, "buildNewsRecyclerView() -> onLikeClick(): " + success.toString());
-                    }
-
-
-                }).addOnFailureListener(error ->
-                {
-                    Toast.makeText(NewsActivity.this, "Failed to save Article!", Toast.LENGTH_SHORT).show();
-                    Log.i(TAG, "buildNewsRecyclerView() -> onLikeClick(): " + error);
-                });
-
-                //remove articles form current search
-                mArticles.remove(position);
-                mArticleCardItems.remove(position);
-
-                mNewsRecyclerAdapter.notifyDataSetChanged();
-                mLikedNewsRecyclerAdapter.notifyDataSetChanged();
-
-                if(Globals.userLikedArticles.size() > 0)
-                {
-                    String likesText = "Likes: " + Globals.userLikedArticles.size();
-                    mLikes.setText(likesText);
-                }
-                else
-                {
-                    mLikes.setText("Likes");
-                }
-
-
+                likeNewsArticle(position);
 
             }
         });
@@ -469,54 +484,9 @@ public class NewsActivity extends AppCompatActivity {
 
             @Override
             public void onDeleteClick(int position) {
-                //TODO: remove article from firebase and from liked articles array list
 
+                deleteLikedArticle(position);
 
-                AlertDialog.Builder deleteArticleAlert = new AlertDialog.Builder(NewsActivity.this);
-
-                deleteArticleAlert.setTitle("Delete Saved Article");
-                deleteArticleAlert.setMessage("Are you sure you want to delete this article?");
-                deleteArticleAlert.setIcon(R.drawable.ic_action_warning);
-                deleteArticleAlert.setCancelable(false);
-                deleteArticleAlert.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-
-                        String urlDeleted = Globals.userLikedArticles.get(position).getLink();
-
-                        mArticles.add(Globals.userLikedArticles.get(position));
-
-                        mArticleCardItems.add(mLikedArticleCardItems.get(position));
-
-                        Globals.userLikedArticles.remove(position);
-                        mLikedArticleCardItems.remove(position);
-
-                        mLikedNewsRecyclerAdapter.notifyDataSetChanged();
-                        mNewsRecyclerAdapter.notifyDataSetChanged();
-
-                        if(Globals.userLikedArticles.size() > 0)
-                        {
-                            String likesText = "Likes: " + Globals.userLikedArticles.size();
-                            mLikes.setText(likesText);
-                        }
-                        else
-                        {
-                            mLikes.setText("Likes");
-                        }
-
-                        //delete the article from firebase
-                        mDatabaseHelper.deleteArticle(Globals.deviceUser.getUserName(), urlDeleted);
-                    }
-                });
-
-                deleteArticleAlert.setNegativeButton("No", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        dialogInterface.dismiss();
-                    }
-                });
-
-                deleteArticleAlert.show();
             }
         });
 
@@ -540,6 +510,47 @@ public class NewsActivity extends AppCompatActivity {
 
     }
 
+    private void likeNewsArticle(int position)
+    {
+        Globals.userLikedArticles.add(mArticles.get(position));
+        mLikedArticleCardItems.add(mArticleCardItems.get(position));
+
+        //save to firebase
+        mDatabaseHelper.saveArticle(mArticles.get(position), Globals.deviceUser.getUserName()).addOnSuccessListener(success ->
+        {
+            Toast.makeText(NewsActivity.this, "Article Saved Successfully!", Toast.LENGTH_SHORT).show();
+
+            if(success != null)
+            {
+                Log.i(TAG, "buildNewsRecyclerView() -> onLikeClick(): " + success.toString());
+            }
+
+
+        }).addOnFailureListener(error ->
+        {
+            Toast.makeText(NewsActivity.this, "Failed to save Article!", Toast.LENGTH_SHORT).show();
+            Log.i(TAG, "buildNewsRecyclerView() -> onLikeClick(): " + error);
+        });
+
+        //remove articles form current search
+        mArticles.remove(position);
+        mArticleCardItems.remove(position);
+
+        mNewsRecyclerAdapter.notifyDataSetChanged();
+        mLikedNewsRecyclerAdapter.notifyDataSetChanged();
+
+        if(Globals.userLikedArticles.size() > 0)
+        {
+            String likesText = "Likes: " + Globals.userLikedArticles.size();
+            mLikes.setText(likesText);
+        }
+        else
+        {
+            mLikes.setText("Likes");
+        }
+
+    }
+
     private boolean articleIsLiked(String url)
     {
         for(NewsArticle article: Globals.userLikedArticles)
@@ -552,6 +563,55 @@ public class NewsActivity extends AppCompatActivity {
         }
 
         return false;
+    }
+
+    private void deleteLikedArticle(int position)
+    {
+        AlertDialog.Builder deleteArticleAlert = new AlertDialog.Builder(NewsActivity.this);
+
+        deleteArticleAlert.setTitle("Delete Saved Article");
+        deleteArticleAlert.setMessage("Are you sure you want to delete this article?");
+        deleteArticleAlert.setIcon(R.drawable.ic_action_warning);
+        deleteArticleAlert.setCancelable(false);
+        deleteArticleAlert.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+
+                String urlDeleted = Globals.userLikedArticles.get(position).getLink();
+
+                mArticles.add(Globals.userLikedArticles.get(position));
+
+                mArticleCardItems.add(mLikedArticleCardItems.get(position));
+
+                Globals.userLikedArticles.remove(position);
+                mLikedArticleCardItems.remove(position);
+
+                mLikedNewsRecyclerAdapter.notifyDataSetChanged();
+                mNewsRecyclerAdapter.notifyDataSetChanged();
+
+                if(Globals.userLikedArticles.size() > 0)
+                {
+                    String likesText = "Likes: " + Globals.userLikedArticles.size();
+                    mLikes.setText(likesText);
+                }
+                else
+                {
+                    mLikes.setText("Likes");
+                }
+
+                //delete the article from firebase
+                mDatabaseHelper.deleteArticle(Globals.deviceUser.getUserName(), urlDeleted);
+            }
+        });
+
+        deleteArticleAlert.setNegativeButton("No", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                dialogInterface.dismiss();
+            }
+        });
+
+        deleteArticleAlert.show();
     }
 
 
