@@ -52,7 +52,7 @@ public class ChatActivity extends AppCompatActivity {
     private TextView mDisplayMessageText;
     private LinearLayout mMessageView;
 
-    private String mCurrentGroupName, mUserName, mFirstName, mCurrentDate, mCurrentTime;
+    private String mCurrentGroupName, mCurrentGroupKey, mUserName, mFirstName, mCurrentDate, mCurrentTime;
 
     private FirebaseDatabaseHelper mDatabaseHelper = new FirebaseDatabaseHelper();
 
@@ -68,8 +68,9 @@ public class ChatActivity extends AppCompatActivity {
         mFirstName = Globals.deviceUser.getFirstName();
 
 
-        //get the group name
+        //get the group name and key
         mCurrentGroupName = getIntent().getExtras().get("group_name").toString();
+        mCurrentGroupKey = getIntent().getExtras().get("group_key").toString();
 
         //initialize ui elements
         initializeElements();
@@ -90,8 +91,8 @@ public class ChatActivity extends AppCompatActivity {
             //clear the message input edit text
             mUserMessageInput.getText().clear();
 
-            //clear message view
-            mDisplayMessageText.setText("");
+            mMessageScroll.fullScroll(ScrollView.FOCUS_DOWN);
+
         });
 
     }
@@ -100,12 +101,13 @@ public class ChatActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
 
-        mDatabaseHelper.getGroupMessages(mCurrentGroupName).addChildEventListener(new ChildEventListener() {
+        mDatabaseHelper.getGroupMessages(mCurrentGroupKey).addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String previousChildName) {
 
                 if(dataSnapshot.exists())
                 {
+                    Log.i(TAG,"onStart() => group messages key: " + dataSnapshot.getKey());
                     displayMessage(dataSnapshot);
                 }
 
@@ -138,6 +140,12 @@ public class ChatActivity extends AppCompatActivity {
         });
     }
 
+    @Override
+    protected void onPause() {
+        super.onPause();
+        mMessageView.removeAllViews();
+    }
+
     private void initializeElements()
     {
         mChatTitleTextView = (TextView) findViewById(R.id.chat_title_textview);
@@ -153,8 +161,7 @@ public class ChatActivity extends AppCompatActivity {
     private void sendMessage()
     {
         String message = mUserMessageInput.getText().toString();
-        String messageKey = mDatabaseHelper.getNewMessageKey(mCurrentGroupName);
-
+        String messageKey = mDatabaseHelper.getNewMessageKey(mCurrentGroupKey);
         if (TextUtils.isEmpty(message))
         {
             Toast.makeText(this, "Please enter a message first", Toast.LENGTH_SHORT);
@@ -172,7 +179,7 @@ public class ChatActivity extends AppCompatActivity {
             Message currentMessage = new Message(message, mUserName, mFirstName, mCurrentDate, mCurrentTime, messageKey);
 
             //save to firebase
-            mDatabaseHelper.saveMessage(currentMessage, mCurrentGroupName).addOnCompleteListener(new OnCompleteListener<Void>() {
+            mDatabaseHelper.saveMessage(currentMessage, mCurrentGroupKey).addOnCompleteListener(new OnCompleteListener<Void>() {
                 @Override
                 public void onComplete(@NonNull Task<Void> task) {
                     if(task.isSuccessful())
@@ -198,24 +205,46 @@ public class ChatActivity extends AppCompatActivity {
     {
         Iterator iterator = dataSnapshot.getChildren().iterator();
 
-        while(iterator.hasNext())
-        {
-            String date = (String) ((DataSnapshot)iterator.next()).getValue();
-            String key = (String) ((DataSnapshot)iterator.next()).getValue();
-            String username = (String) ((DataSnapshot)iterator.next()).getValue();
-            String firstName = (String) ((DataSnapshot)iterator.next()).getValue();
-            String message = (String) ((DataSnapshot)iterator.next()).getValue();
-            String time = (String) ((DataSnapshot)iterator.next()).getValue();
+        Iterable<DataSnapshot> messageSnapshots = dataSnapshot.getChildren();
 
+        for(DataSnapshot message: messageSnapshots)
+        {
+            Log.i(TAG,"displayMessage() => message key: " + message.getKey());
+            String username = String.valueOf(message.child("sentBy").getValue());
+            String firstName = String.valueOf(message.child("sentByFirstName").getValue());
+            String text = String.valueOf(message.child("text").getValue());
+            String date = String.valueOf(message.child("date").getValue());
+            String time = String.valueOf(message.child("time").getValue());
 
             displayMessageFirstName(firstName, username);
 
-            displayMessageText(message, username);
+            displayMessageText(text, username);
 
             displayMessageDateAndTime(date, time, username);
 
-
+            mMessageScroll.fullScroll(ScrollView.FOCUS_DOWN);
         }
+
+//        while(iterator.hasNext())
+//        {
+//            String date = (String) ((DataSnapshot)iterator.next()).getValue();
+//            String key = (String) ((DataSnapshot)iterator.next()).getValue();
+//            String username = (String) ((DataSnapshot)iterator.next()).getValue();
+//            String firstName = (String) ((DataSnapshot)iterator.next()).getValue();
+//            String message = (String) ((DataSnapshot)iterator.next()).getValue();
+//            String time = (String) ((DataSnapshot)iterator.next()).getValue();
+//
+//
+//            displayMessageFirstName(firstName, username);
+//
+//            displayMessageText(message, username);
+//
+//            displayMessageDateAndTime(date, time, username);
+//
+//
+//
+//
+//        }
 
     }
 
@@ -234,11 +263,14 @@ public class ChatActivity extends AppCompatActivity {
         LinearLayout.LayoutParams firstNameParams = new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT);
-
+        int parentWidth = mMessageView.getWidth();
         if(TextUtils.equals(mUserName, username))
         {
-            int parentWidth = mMessageView.getWidth();
             firstNameParams.setMarginStart(parentWidth/2);
+        }
+        else
+        {
+            firstNameParams.setMarginStart(10);
         }
         firstNameTextView.setLayoutParams(firstNameParams);
         mMessageView.addView(firstNameTextView);
@@ -257,10 +289,14 @@ public class ChatActivity extends AppCompatActivity {
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT);
 
+        int parentWidth = mMessageView.getWidth();
         if(TextUtils.equals(mUserName, username))
         {
-            int parentWidth = mMessageView.getWidth();
             messageParams.setMarginStart(parentWidth/2);
+        }
+        else
+        {
+            messageParams.setMarginStart(10);
         }
 
         messageTextView.setLayoutParams(messageParams);
@@ -282,12 +318,19 @@ public class ChatActivity extends AppCompatActivity {
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT);
 
+        int parentWidth = mMessageView.getWidth();
         if(TextUtils.equals(mUserName, username))
         {
-            int parentWidth = mMessageView.getWidth();
+
             datetimeTextView.setGravity(Gravity.RIGHT);
             dateTimeParams.setMargins(parentWidth/2, 1, 10,30);
         }
+        else
+        {
+            dateTimeParams.setMargins(10, 1, 10,30);
+        }
+
+
 
         datetimeTextView.setLayoutParams(dateTimeParams);
 

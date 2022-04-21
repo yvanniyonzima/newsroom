@@ -8,10 +8,10 @@ public class Message {
     private String time;
     private String key;
 
-    public Message(String message, String userSending, String userSendingFristName, String dateSent, String timeSent, String messageKey) {
+    public Message(String message, String userSending, String userSendingFirstName, String dateSent, String timeSent, String messageKey) {
         text = message;
         sentBy = userSending;
-        sentByFirstName = userSendingFristName;
+        sentByFirstName = userSendingFirstName;
         date = dateSent;
         time = timeSent;
         key = messageKey;

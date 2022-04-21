@@ -111,6 +111,9 @@ public class LoginActivity extends AppCompatActivity {
                             //log user to make sure object was created
                             Log.i(TAG, "login() => user: " + Globals.deviceUser);
 
+                            //retrieve user articles
+                            retrieveLikedArticles(username);
+
                             //move to the news activity intent
                             Intent newsActivity = new Intent(LoginActivity.this, NewsActivity.class);
                             startActivity(newsActivity);
@@ -122,7 +125,7 @@ public class LoginActivity extends AppCompatActivity {
                             loginErrorTextview.setText("Invalid username or password. Please try again!");
                         }
 
-                        retrieveLikedArticles(username);
+
                     }
                     else
                     {
@@ -160,26 +163,26 @@ public class LoginActivity extends AppCompatActivity {
 
                         DataSnapshot articleSnapshot = task.getResult();
 
-                         Iterable<DataSnapshot> iterableArticles = articleSnapshot.getChildren();
+                        Iterable<DataSnapshot> iterableArticles = articleSnapshot.getChildren();
 
-                         for(DataSnapshot article: iterableArticles)
-                         {
-                             String author = String.valueOf(article.child("author").getValue());
-                             String country = String.valueOf(article.child("country").getValue());
-                             String published = String.valueOf(article.child("datePublished").getValue());
-                             String language = String.valueOf(article.child("language").getValue());
-                             String link = String.valueOf(article.child("link").getValue());
-                             String mediaLink = String.valueOf(article.child("mediaLink").getValue());
-                             String publisher = String.valueOf(article.child("publisher").getValue());
-                             String summary = String.valueOf(article.child("summary").getValue());
-                             String title = String.valueOf(article.child("title").getValue());
-                             String topic = String.valueOf(article.child("topic").getValue());
-                             NewsArticle tempArticle = new NewsArticle(title, author, published, link, summary, topic,
-                                                                        mediaLink, publisher, country, language);
+                        for(DataSnapshot article: iterableArticles)
+                        {
+                            String author = String.valueOf(article.child("author").getValue());
+                            String country = String.valueOf(article.child("country").getValue());
+                            String published = String.valueOf(article.child("datePublished").getValue());
+                            String language = String.valueOf(article.child("language").getValue());
+                            String link = String.valueOf(article.child("link").getValue());
+                            String mediaLink = String.valueOf(article.child("mediaLink").getValue());
+                            String publisher = String.valueOf(article.child("publisher").getValue());
+                            String summary = String.valueOf(article.child("summary").getValue());
+                            String title = String.valueOf(article.child("title").getValue());
+                            String topic = String.valueOf(article.child("topic").getValue());
+                            NewsArticle tempArticle = new NewsArticle(title, author, published, link, summary, topic,
+                                    mediaLink, publisher, country, language);
 
-                             Log.i(TAG, "retrieveLikedArticles() => " + tempArticle);
-                             Globals.userLikedArticles.add(tempArticle);
-                         }
+                            Log.i(TAG, "retrieveLikedArticles() => " + tempArticle);
+                            Globals.userLikedArticles.add(tempArticle);
+                        }
                     }
                 }
             }

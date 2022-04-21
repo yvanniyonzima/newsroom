@@ -1,21 +1,16 @@
 package comp4905.newsroom.Classes;
 
 
-import android.provider.ContactsContract;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.Query;
-import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 
@@ -61,7 +56,6 @@ public class FirebaseDatabaseHelper {
         return mUserReference.child(username).get();
     }
 
-    //READ ALL USER NEWS ARTICLES
 
     //SAVE LIKED NEWS ARTICLES
     public Task<Void> saveArticle(NewsArticle article, String userName)
@@ -149,9 +143,11 @@ public class FirebaseDatabaseHelper {
     }
 
     //CREATE AND SAVE NEW MANUAL GROUP
-    public Task<Void> saveNewGroup(String groupName)
+    public Task<Void> saveNewGroup(Group group)
     {
-        return mGroupReference.child(groupName).setValue("");
+        String groupKey = mGroupReference.push().getKey();
+        group.setUniqueKey(groupKey);
+        return mGroupReference.child(groupKey).setValue(group);
     }
 
     //RETRIEVE GROUPS NAMES
@@ -161,22 +157,22 @@ public class FirebaseDatabaseHelper {
     }
 
     //GET A NEW MESSAGE KEY
-    public String getNewMessageKey(String groupName)
+    public String getNewMessageKey(String groupKey)
     {
-        return mGroupReference.child(groupName).push().getKey();
+        return mGroupReference.child(groupKey).child("messages").push().getKey();
 
     }
 
     //SAVE GROUP MASSAGE
-    public Task<Void> saveMessage(Message message, String groupName)
+    public Task<Void> saveMessage(Message message, String groupKey)
     {
-        return mGroupReference.child(groupName).child(message.getKey()).setValue(message);
+        return mGroupReference.child(groupKey).child("messages").child(message.getKey()).setValue(message);
     }
 
     //RETRIEVE MESSAGES FOR GROUPS
-    public DatabaseReference getGroupMessages(String groupName)
+    public DatabaseReference getGroupMessages(String groupKey)
     {
-        return mGroupReference.child(groupName);
+        return mGroupReference.child(groupKey);
     }
 
 

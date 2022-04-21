@@ -41,6 +41,7 @@ import java.util.Collections;
 import comp4905.newsroom.Classes.ArticleCardItem;
 import comp4905.newsroom.Classes.FirebaseDatabaseHelper;
 import comp4905.newsroom.Classes.Globals;
+import comp4905.newsroom.Classes.Group;
 import comp4905.newsroom.Classes.NewsAPIClient;
 import comp4905.newsroom.Classes.NewsArticle;
 import comp4905.newsroom.Classes.NewsSearchRecycler.LikedSearchRecyclerAdapter;
@@ -128,6 +129,10 @@ public class NewsActivity extends AppCompatActivity {
     FirebaseDatabaseHelper mDatabaseHelper = new FirebaseDatabaseHelper();
     NewsAPIClient apiClient = new NewsAPIClient();
     ParseJSONResults newsJSONParser = new ParseJSONResults();
+
+    //fro group creation
+    private String mGroupStatusChoice = "";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -327,7 +332,7 @@ public class NewsActivity extends AppCompatActivity {
                 else if (menuItem.getItemId() == R.id.new_group_menu_option)
                 {
                     //TODO:create new group
-                    requestNewManualGroup();
+                    groupCreation();
                 }
                 else
                 {
@@ -341,28 +346,57 @@ public class NewsActivity extends AppCompatActivity {
     }
 
     //function to create a new group
-    private void requestNewManualGroup()
+    private void groupCreation()
     {
         AlertDialog.Builder newGroupBuilder = new AlertDialog.Builder(NewsActivity.this);
 
-        newGroupBuilder.setTitle("Enter Group Name : ");
+        newGroupBuilder.setTitle("Enter group details");
 
-        final EditText groupNameField = new EditText(NewsActivity.this);
-        groupNameField.setHint("e.g: Cyber truck news");
-        newGroupBuilder.setView(groupNameField);
+        final View groupCreationView = getLayoutInflater().inflate(R.layout.create_group_layout, null);
+
+        EditText groupNameField = groupCreationView.findViewById(R.id.new_group_name);
+        EditText groupDescriptionField = groupCreationView.findViewById(R.id.new_group_description);
+        EditText groupTopicField = groupCreationView.findViewById(R.id.new_group_topic_url);
+        final RadioGroup groupStatusRadio = groupCreationView.findViewById(R.id.new_group_status_choices);
+        final String[] checkedStatus = new String[1];
+
+        groupStatusRadio.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(RadioGroup statusGroup, int checkedSort)
+            {
+                //get the selected radiobutton
+                RadioButton selectedSorting = (RadioButton) statusGroup.findViewById(checkedSort);
+
+                //get the text of the selected id
+                checkedStatus[0] = selectedSorting.getText().toString().toLowerCase();
+            }
+        });
+
+
+        //set the view for this Alert
+        newGroupBuilder.setView(groupCreationView);
 
         newGroupBuilder.setPositiveButton("Create", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
                 String groupName = groupNameField.getText().toString();
+                String groupDescription = groupDescriptionField.getText().toString();
+                String groupTopicUrl = groupTopicField.getText().toString();
+                String statusChoice = checkedStatus[0].toLowerCase();
 
                 if (TextUtils.isEmpty(groupName))
                 {
-                    Toast.makeText(NewsActivity.this, "Please Write Group Name", Toast.LENGTH_LONG);
+                    Toast.makeText(NewsActivity.this, "Please write group name", Toast.LENGTH_LONG);
+                }
+
+                else if(TextUtils.isEmpty(statusChoice))
+                {
+                    Toast.makeText(NewsActivity.this, "Please choose group status", Toast.LENGTH_LONG);
                 }
                 else
                 {
-                    createNewGroup(groupName);
+                    Group createGroup = new Group(groupName, Globals.deviceUser.getUserName(), groupDescription, statusChoice, groupTopicUrl);
+                    createNewGroup(createGroup);
                 }
             }
         });
@@ -380,23 +414,27 @@ public class NewsActivity extends AppCompatActivity {
 
     }
 
-    private void createNewGroup(String groupName)
+
+    private void createNewGroup(Group group)
     {
-        mDatabaseHelper.saveNewGroup(groupName).addOnCompleteListener(new OnCompleteListener<Void>() {
+        mDatabaseHelper.saveNewGroup(group).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
                 if(task.isSuccessful())
                 {
-                    Toast.makeText(NewsActivity.this, groupName + " is created successfully", Toast.LENGTH_SHORT);
-                    Log.i(TAG, "createNewGroup() => group name " + groupName + " created successfully");
+                    Toast.makeText(NewsActivity.this, group.getName() + " is created successfully", Toast.LENGTH_SHORT);
+                    Log.i(TAG, "createNewGroup() => group name " + group.getName() + " created successfully");
+
+                    //go to groups activity
+
                 }
 
             }
         }).addOnFailureListener(new OnFailureListener() {
             @Override
             public void onFailure(@NonNull Exception e) {
-                Toast.makeText(NewsActivity.this, groupName + " failed to created", Toast.LENGTH_SHORT);
-                Log.e(TAG, "createNewGroup() => group name " + groupName + " was not created");
+                Toast.makeText(NewsActivity.this, group.getName() + " failed to created", Toast.LENGTH_SHORT);
+                Log.e(TAG, "createNewGroup() => group name " + group.getName() + " was not created");
                 Log.e(TAG, "createNewGroup() => : " + e);
             }
         });
@@ -496,7 +534,7 @@ public class NewsActivity extends AppCompatActivity {
             for(NewsArticle article : Globals.userLikedArticles)
             {
                 ArticleCardItem tempArticleItem = new ArticleCardItem(article.getTitle(), article.getTopic(), article.getSummary(),
-                                                                    article.getPublisher(), article.getDatePublished(), article.getLink());
+                        article.getPublisher(), article.getDatePublished(), article.getLink());
                 mLikedArticleCardItems.add(tempArticleItem);
             }
 
@@ -763,7 +801,7 @@ public class NewsActivity extends AppCompatActivity {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
                 mFromCountrySelected = adapterView.getItemAtPosition(i).toString();
-               //Log.i(TAG, "filtersOnClickListeners() => country news source selected: " + mFromCountrySelected);
+                //Log.i(TAG, "filtersOnClickListeners() => country news source selected: " + mFromCountrySelected);
             }
 
             @Override
@@ -923,7 +961,7 @@ public class NewsActivity extends AppCompatActivity {
     {
         //make an array of languages
         String languages = mNewsFeedLanguages.getText().toString().trim();
-        String [] languagesArray = new String[0];
+        String[] languagesArray = new String[0];
 
         if(!languages.isEmpty() || languages != null)
         {
@@ -998,7 +1036,7 @@ public class NewsActivity extends AppCompatActivity {
     {
         //make an array of languages
         String worldTrendingLanguages = mWorldTrendingLanguages.getText().toString().trim();
-        String [] worldTrendingLanguagesArray = new String[0];
+        String[] worldTrendingLanguagesArray = new String[0];
 
         if(!worldTrendingLanguages.isEmpty() || worldTrendingLanguages != null)
         {
@@ -1129,7 +1167,7 @@ public class NewsActivity extends AppCompatActivity {
                                 mNewsRecyclerAdapter.notifyDataSetChanged();
                             }
                         });
-                        
+
                     }catch (IOException e)
                     {
                         Log.e(TAG, "handleTopicSearchFiltering() => failed to search topic '" + topic + ",: " + e);

@@ -1,7 +1,6 @@
 package comp4905.newsroom.Classes;
 
 import java.util.ArrayList;
-import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -12,22 +11,22 @@ public class Globals {
     public static ArrayList<NewsArticle> userLikedArticles = new ArrayList<>();
 
     //these are all the topics that the user an choose from and will be used to filter searches
-    public static String[] topics = {"News", "Sport", "Tech", "World", "Finance", "Politics",
+    public static java.lang.String[] topics = {"News", "Sport", "Tech", "World", "Finance", "Politics",
             "Business", "Economics", "Entertainment", "Beauty", "Gaming"};
 
     //map of languages available to filter searches
-    public static Map<String, String> languagesMap = Stream.of(new Object[][] {
+    public static Map<java.lang.String, java.lang.String> languagesMap = Stream.of(new Object[][] {
             {"Bengali", "bn"},  {"Dutch", "nl"},  {"English", "en"},  {"French", "fr"},
             {"German", "de"},  {"Hindi", "hi"},  {"Italian", "it"},  {"Polish", "pl"},
             {"Portuguese", "pt"},  {"Punjabi", "pa"}, {"Russian", "rn"}, {"Spanish", "es"},
             {"Tamil", "ta"}, {"Turkish", "tr"}, {"Ukrainian", "uk"}
-            }).collect(Collectors.toMap(p -> (String)p[0], p -> (String)p[1]));
+            }).collect(Collectors.toMap(p -> (java.lang.String)p[0], p -> (java.lang.String)p[1]));
 
     //languages for filter
-    public static String[] languages = languagesMap.keySet().toArray(new String[0]);
+    public static java.lang.String[] languages = languagesMap.keySet().toArray(new java.lang.String[0]);
 
     //country codes for filter
-    public static Map<String, String> countryCodes = Stream.of(new Object[][] {
+    public static Map<java.lang.String, java.lang.String> countryCodes = Stream.of(new Object[][] {
             {"Afghanistan","af"},{"Albania","al"},{"Algeria","dz"},{"Andorra","ad"},{"Angola","ao"},{"Anguilla","ai"},{"Antarctica","aq"},{"AntiguaandBarbuda","ag"},{"Argentina","ar"},{"Armenia","am"},{"Aruba","aw"},{"Australia","au"},{"Austria","at"},{"Azerbaijan","az"},
                     {"Bahamas","bs"},{"Bahrain","bh"},{"Bangladesh","bd"},{"Barbados","bb"},{"Belarus","by"},{"Belgium","be"},{"Belize","bz"},{"Bermuda","bm"},{"Bhutan","bt"},{"Bolivia,PlurinationalStateof","bo"},{"BosniaandHerzegovina","ba"},{"Botswana","bw"},{"Brazil","br"},
                     {"BruneiDarussalam","bn"},{"Bulgaria","bg"},{"Burundi","bi"},{"Cambodia","kh"},{"Cameroon","cm"},{"Canada","ca"},{"Chad","td"},{"Chile","cl"},{"China","cn"},{"Colombia","co"},{"Congo","cg"},{"Croatia","hr"},{"Cuba","cu"},{"Cyprus","cy"},{"Czechia","cz"},
@@ -46,10 +45,10 @@ public class Globals {
                     {"Guinea-Bissau","gw"},{"HeardIslandandMcDonaldIslands","hm"},{"HongKong","hk"},{"IsleofMan","im"},{"Côted'Ivoire","ci"},{"Kiribati","ki"},{"Kosovo","xk"},{"Lesotho","ls"},{"Macao","mo"},{"MarshallIslands","mh"},{"Martinique","mq"},{"NewCaledonia","nc"},{"NorfolkIsland","nf"},
                     {"Korea,DemocraticPeople'sRepublicof","kp"},{"NorthernMarianaIslands","mp"},{"Pitcairn","pn"},{"SaintKittsandNevis","kn"},{"SaintLucia","lc"},{"SaintPierreandMiquelon","pm"},{"SaintVincentandtheGrenadines","vc"},{"SanMarino","sm"},{"Seychelles","sc"},{"SierraLeone","sl"},{"SintMaarten(Dutchpart)","sx"},
                     {"SolomonIslands","sb"},{"SouthGeorgiaandtheSouthSandwichIslands","gs"},{"SouthSudan","ss"},{"SvalbardandJanMayen","sj"},{"SaoTomeandPrincipe","st"},{"Timor-Leste","tl"},{"TurksandCaicosIslands","tc"},{"VirginIslands,U.S.","vi"},{"Vanuatu","vu"},{"HolySee(VaticanCityState)","va"},{"WallisandFutuna","wf"},{"WesternSahara","eh"},{"ÅlandIslands","ax"}
-            }).collect(Collectors.toMap(p -> (String)p[0], p -> (String)p[1]));
+            }).collect(Collectors.toMap(p -> (java.lang.String)p[0], p -> (java.lang.String)p[1]));
 
     //countries for filter
-    public static String[] countries = countryCodes.keySet().toArray(new String[0]);
+    public static java.lang.String[] countries = countryCodes.keySet().toArray(new java.lang.String[0]);
 
 
 

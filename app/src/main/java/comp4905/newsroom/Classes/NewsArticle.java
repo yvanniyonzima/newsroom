@@ -53,15 +53,15 @@ public class NewsArticle
     @Override
     public String toString() {
         String articleInfo = "Article: " + title + "\n" +
-                            "Author: " + author + "\n" +
-                            "Date Published: " + datePublished + "\n" +
-                            "link: " + link + "\n" +
-                            "Summary: " + summary + "\n" +
-                            "Topic: " + topic + "\n" +
-                            "Media Links: " + mediaLink + "\n" +
-                            "Publisher: " + publisher + "\n" +
-                            "Country: " + country + "\n" +
-                            "Language: " + language + "\n";
+                "Author: " + author + "\n" +
+                "Date Published: " + datePublished + "\n" +
+                "link: " + link + "\n" +
+                "Summary: " + summary + "\n" +
+                "Topic: " + topic + "\n" +
+                "Media Links: " + mediaLink + "\n" +
+                "Publisher: " + publisher + "\n" +
+                "Country: " + country + "\n" +
+                "Language: " + language + "\n";
         return articleInfo;
     }
 }

@@ -8,7 +8,6 @@ import java.util.Random;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
-import okhttp3.internal.http.RealResponseBody;
 
 public class NewsAPIClient
 {
@@ -235,7 +234,7 @@ public class NewsAPIClient
         return responseToString;
     }
 
-    public String searchTopic(String[] query,String[] languages, String sorting) throws IOException
+    public String searchTopic(String[] query, String[] languages, String sorting) throws IOException
     {
         //build the url
         String topicSearchUrl = BASE_URL + TOPIC_SEARCH;

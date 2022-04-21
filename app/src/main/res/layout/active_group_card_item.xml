@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    app:cardCornerRadius="5dp"
+    android:layout_marginTop="5dp"
+    android:background="@drawable/grey_rectangle">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="239dp"
+        android:background="@drawable/grey_rectangle">
+
+        <TextView
+            android:id="@+id/active_group_name"
+            android:layout_width="wrap_content"
+            android:layout_height="30dp"
+            android:maxWidth="300dp"
+            android:padding="2dp"
+            android:text="Summer Activities"
+            android:textColor="@color/black"
+            android:textSize="20sp"
+            android:fontFamily="@font/baskervville_italic"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:layout_marginTop="10dp"
+            android:layout_marginLeft="10dp"/>
+
+        <TextView
+            android:id="@+id/active_group_status"
+            android:layout_width="wrap_content"
+            android:layout_height="30dp"
+            android:fontFamily="@font/baskervville_italic"
+            android:padding="2dp"
+            android:text="Private"
+            android:textColor="@color/black"
+            android:textSize="14sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:layout_marginRight="10dp"
+            android:layout_marginTop="10dp"/>
+
+        <TextView
+            android:id="@+id/active_chat_info"
+            android:layout_width="match_parent"
+            android:layout_height="140dp"
+            android:background="@drawable/white_rectangle"
+            android:padding="20dp"
+            android:text="TextView"
+            android:textSize="16sp"
+            android:textColor="@color/black"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/active_group_name"
+            android:layout_marginTop="10dp"/>
+
+        <TextView
+            android:id="@+id/active_group_topic"
+            android:layout_width="wrap_content"
+            android:layout_height="30dp"
+            android:maxWidth="200dp"
+            android:padding="2dp"
+            android:text="Today's German Cars"
+            android:textSize="16sp"
+            android:textColor="@color/black"
+            android:fontFamily="@font/baskervville_italic"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/active_chat_info"
+            android:layout_marginTop="10dp"
+            android:layout_marginLeft="10dp"/>
+
+        <ImageView
+            android:id="@+id/active_group_link"
+            android:layout_width="33dp"
+            android:layout_height="26dp"
+            android:layout_marginTop="10dp"
+            app:layout_constraintEnd_toStartOf="@+id/active_group_join"
+            app:layout_constraintTop_toBottomOf="@+id/active_chat_info"
+            android:layout_marginRight="20dp"
+            app:srcCompat="@drawable/news_card_link" />
+
+        <TextView
+            android:id="@+id/active_group_join"
+            android:layout_width="wrap_content"
+            android:layout_height="30dp"
+            android:padding="2dp"
+            android:clickable="true"
+            android:text="Join"
+            android:textSize="18sp"
+            android:textColor="@color/purple_700"
+            android:fontFamily="@font/baskervville_italic"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/active_chat_info"
+            android:layout_marginTop="10dp"
+            android:layout_marginRight="10dp"/>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+</androidx.cardview.widget.CardView>
