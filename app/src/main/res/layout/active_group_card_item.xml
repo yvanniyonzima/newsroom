@@ -10,7 +10,7 @@
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="239dp"
+        android:layout_height="210dp"
         android:background="@drawable/grey_rectangle">
 
         <TextView
@@ -45,11 +45,11 @@
         <TextView
             android:id="@+id/active_chat_info"
             android:layout_width="match_parent"
-            android:layout_height="140dp"
+            android:layout_height="110dp"
             android:background="@drawable/white_rectangle"
             android:padding="20dp"
             android:text="TextView"
-            android:textSize="16sp"
+            android:textSize="18sp"
             android:textColor="@color/black"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"

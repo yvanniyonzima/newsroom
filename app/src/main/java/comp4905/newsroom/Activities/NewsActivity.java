@@ -6,6 +6,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.app.AlertDialog;
+import android.content.ActivityNotFoundException;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
@@ -34,8 +35,10 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Collections;
 
 import comp4905.newsroom.Classes.ArticleCardItem;
@@ -44,8 +47,8 @@ import comp4905.newsroom.Classes.Globals;
 import comp4905.newsroom.Classes.Group;
 import comp4905.newsroom.Classes.NewsAPIClient;
 import comp4905.newsroom.Classes.NewsArticle;
-import comp4905.newsroom.Classes.NewsSearchRecycler.LikedSearchRecyclerAdapter;
-import comp4905.newsroom.Classes.NewsSearchRecycler.NewsSearchRecyclerAdapter;
+import comp4905.newsroom.Classes.RecyclerAdapters.LikedSearchRecyclerAdapter;
+import comp4905.newsroom.Classes.RecyclerAdapters.NewsSearchRecyclerAdapter;
 import comp4905.newsroom.Classes.ParseJSONResults;
 import comp4905.newsroom.R;
 
@@ -332,7 +335,7 @@ public class NewsActivity extends AppCompatActivity {
                 else if (menuItem.getItemId() == R.id.new_group_menu_option)
                 {
                     //TODO:create new group
-                    groupCreation();
+                    groupCreation(false, null);
                 }
                 else
                 {
@@ -346,7 +349,7 @@ public class NewsActivity extends AppCompatActivity {
     }
 
     //function to create a new group
-    private void groupCreation()
+    private void groupCreation(boolean fromArticle, NewsArticle article)
     {
         AlertDialog.Builder newGroupBuilder = new AlertDialog.Builder(NewsActivity.this);
 
@@ -356,7 +359,8 @@ public class NewsActivity extends AppCompatActivity {
 
         EditText groupNameField = groupCreationView.findViewById(R.id.new_group_name);
         EditText groupDescriptionField = groupCreationView.findViewById(R.id.new_group_description);
-        EditText groupTopicField = groupCreationView.findViewById(R.id.new_group_topic_url);
+        EditText groupTopicField = groupCreationView.findViewById(R.id.new_group_topic);
+        EditText groupTopicUrlField = groupCreationView.findViewById(R.id.new_group_topic_url);
         final RadioGroup groupStatusRadio = groupCreationView.findViewById(R.id.new_group_status_choices);
         final String[] checkedStatus = new String[1];
 
@@ -368,7 +372,7 @@ public class NewsActivity extends AppCompatActivity {
                 RadioButton selectedSorting = (RadioButton) statusGroup.findViewById(checkedSort);
 
                 //get the text of the selected id
-                checkedStatus[0] = selectedSorting.getText().toString().toLowerCase();
+                checkedStatus[0] = selectedSorting.getText().toString();
             }
         });
 
@@ -376,13 +380,21 @@ public class NewsActivity extends AppCompatActivity {
         //set the view for this Alert
         newGroupBuilder.setView(groupCreationView);
 
+        if(fromArticle)
+        {
+            groupTopicField.setText(article.getTitle());
+            groupTopicUrlField.setText(article.getLink());
+            groupDescriptionField.setText("Lets talk about " + article.getTitle());
+        }
+
         newGroupBuilder.setPositiveButton("Create", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
                 String groupName = groupNameField.getText().toString();
                 String groupDescription = groupDescriptionField.getText().toString();
-                String groupTopicUrl = groupTopicField.getText().toString();
-                String statusChoice = checkedStatus[0].toLowerCase();
+                String groupTopic = groupTopicField.getText().toString();
+                String groupTopicUrl = groupTopicUrlField.getText().toString();
+                String statusChoice = checkedStatus[0];
 
                 if (TextUtils.isEmpty(groupName))
                 {
@@ -395,7 +407,11 @@ public class NewsActivity extends AppCompatActivity {
                 }
                 else
                 {
-                    Group createGroup = new Group(groupName, Globals.deviceUser.getUserName(), groupDescription, statusChoice, groupTopicUrl);
+                    Calendar calForDate = Calendar.getInstance();
+                    SimpleDateFormat currentDateFormat = new SimpleDateFormat("MMM dd, yyyy");
+                    String groupCreationDate = currentDateFormat.format((calForDate.getTime()));
+
+                    Group createGroup = new Group(groupName, Globals.deviceUser.getUserName(), groupDescription, statusChoice, groupTopic, groupTopicUrl, groupCreationDate);
                     createNewGroup(createGroup);
                 }
             }
@@ -466,7 +482,7 @@ public class NewsActivity extends AppCompatActivity {
 
             @Override
             public void onChatBubbleClick(int position) {
-                //TODO: create a new chat from the article
+                groupCreation(true, mArticles.get(position));
             }
 
             @Override
@@ -475,7 +491,12 @@ public class NewsActivity extends AppCompatActivity {
                 Uri uri = Uri.parse(link);
                 Log.i(TAG,"buildNewsRecyclerView() => following link: " + link);
                 Intent visitArticlePage = new Intent(Intent.ACTION_VIEW, uri);
-                startActivity(visitArticlePage);
+                try {
+                    startActivity(visitArticlePage);
+                }catch (ActivityNotFoundException exception)
+                {
+                    Toast.makeText(NewsActivity.this, "No browswer found to open webpage", Toast.LENGTH_SHORT).show();
+                }
             }
 
             @Override
@@ -508,7 +529,7 @@ public class NewsActivity extends AppCompatActivity {
 
             @Override
             public void onChatBubbleClick(int position) {
-                //TODO: create a new chat from the article
+                groupCreation(true, Globals.userLikedArticles.get(position));
             }
 
             @Override
@@ -517,7 +538,12 @@ public class NewsActivity extends AppCompatActivity {
                 Uri uri = Uri.parse(link);
                 Log.i(TAG,"buildNewsRecyclerView() => following link: " + link);
                 Intent visitArticlePage = new Intent(Intent.ACTION_VIEW, uri);
-                startActivity(visitArticlePage);
+                try {
+                    startActivity(visitArticlePage);
+                }catch (ActivityNotFoundException exception)
+                {
+                    Toast.makeText(NewsActivity.this, "No browswer found to open webpage", Toast.LENGTH_SHORT).show();
+                }
             }
 
             @Override

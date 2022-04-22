@@ -11,15 +11,14 @@
         android:text="Enter group name"
         android:padding="2dp"
         android:textSize="14sp"
-        android:layout_marginBottom="5dp"/>
+        android:layout_marginBottom="3dp"/>
 
     <EditText
         android:id="@+id/new_group_name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:hint="e.g. Fifa 2022"
-        android:textSize="18sp"
-        android:padding="2dp"
+        android:textSize="16sp"
         android:minWidth="200dp"
         android:layout_marginBottom="10dp"/>
 
@@ -28,13 +27,13 @@
         android:layout_height="wrap_content"
         android:textSize="14sp"
         android:text="Enter group Description"
-        android:layout_marginBottom="5dp" />
+        android:layout_marginBottom="3dp" />
 
     <EditText
         android:id="@+id/new_group_description"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textSize="18sp"
+        android:textSize="16sp"
         android:hint="e.g. Who wants to predict the winners of this cup?"
         android:maxLines="5"
         android:minWidth="200dp"
@@ -52,7 +51,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:minWidth="200dp"
-        android:textSize="18sp"
+        android:textSize="16sp"
         android:hint="Fifa 2022 brackets finalized"
         android:layout_marginBottom="5dp"/>
 
@@ -68,7 +67,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:minWidth="200dp"
-        android:textSize="18sp"
+        android:textSize="16sp"
         android:hint="https://www.fifa.com/tournaments/mens/worldcup/qatar2022/fwc-2022-draw"
         android:layout_marginBottom="5dp"/>
 

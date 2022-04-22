@@ -1,4 +1,4 @@
-package comp4905.newsroom.Classes.NewsSearchRecycler;
+package comp4905.newsroom.Classes.RecyclerAdapters;
 
 import android.view.LayoutInflater;
 import android.view.View;

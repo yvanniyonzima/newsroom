@@ -5,7 +5,15 @@
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-
+    <ImageView
+        android:id="@+id/active_group_back"
+        android:layout_width="45dp"
+        android:layout_height="45dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_marginTop="20dp"
+        android:layout_marginLeft="10dp"
+        app:srcCompat="@drawable/arrow_back" />
 
     <TextView
         android:id="@+id/chat_title_textview"
@@ -13,14 +21,14 @@
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
-        android:layout_marginStart="4dp"
         android:layout_marginTop="10dp"
         android:fontFamily="@font/baskervville_italic"
         android:gravity="top"
         android:text="Group Chats"
-        android:textAppearance="@style/newsroom"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:textAppearance="@style/group_chats"
+        app:layout_constraintStart_toEndOf="@+id/active_group_back"
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_marginLeft="3dp"/>
 
     <ImageView
         android:id="@+id/group_chats_menu"
@@ -74,16 +82,20 @@
         android:padding="10dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        android:visibility="gone"
+        android:visibility="visible"
         app:layout_constraintTop_toBottomOf="@+id/chats_button_layout" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/active_groups_recycler"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
         android:padding="4dp"
         android:scrollbars="vertical"
+        android:visibility="gone"
+        app:layout_constraintHeight_default="spread"
         app:layout_constraintTop_toBottomOf="@+id/chats_button_layout"/>
+
+
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>
