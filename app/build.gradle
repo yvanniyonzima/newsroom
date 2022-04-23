@@ -59,6 +59,9 @@ dependencies {
 
     implementation 'com.google.firebase:firebase-analytics'
 
+    //for notifications
+    implementation 'com.google.firebase:firebase-messaging'
+
     //for any other desired firebase products
     // https://firebase.google.com/docs/android/setup#available-libraries
 

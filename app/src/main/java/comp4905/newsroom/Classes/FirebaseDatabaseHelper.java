@@ -2,6 +2,7 @@ package comp4905.newsroom.Classes;
 
 
 import android.util.Log;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 
@@ -13,6 +14,8 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.ArrayList;
+
+import comp4905.newsroom.Activities.GroupChatsActivity;
 
 public class FirebaseDatabaseHelper {
     //for logging
@@ -150,6 +153,13 @@ public class FirebaseDatabaseHelper {
         return mGroupReference.child(groupKey).setValue(group);
     }
 
+    //INITIALIZE BANNED AND REQUESTS
+    public void bannedAndRequestsInit(String groupKey)
+    {
+        mGroupReference.child(groupKey).child("bannedMembers").setValue("");
+        mGroupReference.child(groupKey).child("joinRequests").setValue("");
+    }
+
     //RETRIEVE GROUPS NAMES
     public DatabaseReference getGroups()
     {
@@ -173,6 +183,105 @@ public class FirebaseDatabaseHelper {
     public DatabaseReference getGroupMessages(String groupKey)
     {
         return mGroupReference.child(groupKey);
+    }
+
+    //ADD USER TO GROUP MEMBERS
+    public Task<DataSnapshot> getGroupMembers(String groupKey)
+    {
+        Log.i(TAG, "addUserToGroup() => retrieving members for group " + groupKey);
+        return mGroupReference.child(groupKey).child("members").get();
+    }
+
+    public Task<Void> addUserToGroup(String groupKey, ArrayList<String> groupMembers, int numMembers)
+    {
+
+        //update the number of members
+        mGroupReference.child(groupKey).child("numMembers").setValue(numMembers);
+
+        //set the value for members
+        return mGroupReference.child(groupKey).child("members").setValue(groupMembers);
+
+    }
+
+    public void updateGroupMembers(String groupKey, ArrayList<String> groupMembers, int numMembers)
+    {
+        mGroupReference.child(groupKey).child("members").setValue(groupMembers).addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+
+                if (task.isComplete())
+                {
+                    Log.i(TAG, "updateGroupMembers() => Successfully added new member to group");
+
+                }
+
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+
+                Log.e(TAG, "updateGroupMembers() => Failed to add new member to group");
+
+            }
+        });
+
+        mGroupReference.child(groupKey).child("numMembers").setValue(numMembers).addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+
+            }
+        });
+    }
+
+    //SAVE REQUESTS TO JOIN GROUPS
+    private Task<DataSnapshot> getGroupJoinRequests(String groupKey)
+    {
+        return mGroupReference.child(groupKey).child("joinRequests").get();
+    }
+    public void saveJoinRequest(String username,String groupKey)
+    {
+        ArrayList<String> joinRequests = new ArrayList<>();
+
+        getGroupJoinRequests(groupKey).addOnCompleteListener(new OnCompleteListener<DataSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DataSnapshot> task) {
+                if(task.isComplete())
+                {
+                    if(task.getResult().exists())
+                    {
+                        Iterable<DataSnapshot> iterableRequests = task.getResult().getChildren();
+
+                        for(DataSnapshot request: iterableRequests)
+                        {
+                            joinRequests.add(String.valueOf(request.getValue()));
+
+                        }
+
+                        joinRequests.add(username);
+
+                        //update the join requests
+                        updateJoinRequests(groupKey,joinRequests);
+
+                    }
+                }
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+
+            }
+        });
+
+    }
+
+    private void updateJoinRequests(String groupKey, ArrayList<String> requestingUsers)
+    {
+        mGroupReference.child(groupKey).child("joinRequests").setValue(requestingUsers);
     }
 
 

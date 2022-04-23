@@ -182,6 +182,91 @@ public class GroupChatsActivity extends AppCompatActivity {
 
             @Override
             public void onGroupJoinClick(int position) {
+                //get all the necessary fields
+                //mActiveGroupsCardItems.get(position).
+                Group groupToJoin = mActiveGroupsCardItems.get(position).getRelatedGroup();
+                Log.i(TAG, "group status = " + groupToJoin.getStatus());
+                if (TextUtils.equals(groupToJoin.getStatus(),"Public"))
+                {
+                    String groupKey = groupToJoin.getUniqueKey();
+                    int groupNumMembers = groupToJoin.getNumMembers() + 1;
+                    ArrayList<String> members = groupToJoin.getMembers();
+
+                    Log.i(TAG, "Current members = " + members);
+
+                    members.add(Globals.deviceUser.getUserName());
+
+
+                    mDatabaseHelper.addUserToGroup(groupKey, members, groupNumMembers).addOnCompleteListener(new OnCompleteListener<Void>() {
+                        @Override
+                        public void onComplete(@NonNull Task<Void> task) {
+                            if(task.isSuccessful())
+                            {
+                                //retrieve all groups again
+                                retrieveGroups();
+
+                                //hide active groups recycler
+                                mActiveGroupsRecyclerView.setVisibility(View.GONE);
+
+                                //show users groups listview
+                                mUserChatsListView.setVisibility(View.VISIBLE);
+                            }
+
+                        }
+                    }).addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Log.e(TAG, "buildActiveGroupRecyclerView() => Failed to add member to public group");
+
+                        }
+                    });
+
+
+                }
+                else //the group chat is private
+                {
+                    Log.i(TAG, "Groups join requests: " + groupToJoin.getJoinRequests());
+                    Log.i(TAG, "Device global user: " + Globals.deviceUser.getUserName());
+                    if(groupToJoin.getJoinRequests().contains(Globals.deviceUser.getUserName()))
+                    {
+                        //the user has already sent a request
+                        AlertDialog.Builder requestAlreadySent = new AlertDialog.Builder(GroupChatsActivity.this);
+                        requestAlreadySent.setTitle("Request already sent!");
+                        requestAlreadySent.setMessage("You have already sent a request to join this group");
+                        requestAlreadySent.setCancelable(true);
+                        requestAlreadySent.setPositiveButton("Dismiss", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                dialogInterface.dismiss();
+                            }
+                        });
+                        requestAlreadySent.show();
+                    }
+                    else
+                    {
+                        //send a request to join group
+                        AlertDialog.Builder requestBuilder = new AlertDialog.Builder(GroupChatsActivity.this);
+                        requestBuilder.setTitle("Request to join group");
+                        requestBuilder.setMessage("The group " + groupToJoin.getName() + " is private. Send a request to join the group?");
+                        requestBuilder.setCancelable(false);
+                        requestBuilder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                mDatabaseHelper.saveJoinRequest(Globals.deviceUser.getUserName(), groupToJoin.getUniqueKey());
+
+                                retrieveGroups();
+                            }
+                        });
+                        requestBuilder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                dialogInterface.dismiss();
+                            }
+                        });
+                        requestBuilder.show();
+                    }
+
+                }
 
             }
         });
@@ -191,9 +276,8 @@ public class GroupChatsActivity extends AppCompatActivity {
     {
 
         String groupName = mUserChatTitles.get(position);
-        String groupKey = mGroupsHashMap.values().stream().collect(Collectors.toCollection(ArrayList::new)).get(position);
-
-        groupKey = String.valueOf(mGroupsHashMap.values().toArray()[position]);
+        //String groupKey = mGroupsHashMap.values().stream().collect(Collectors.toCollection(ArrayList::new)).get(position);
+        String groupKey = String.valueOf(mGroupsHashMap.values().toArray()[position]);
 
         Intent chatActivityIntent = new Intent(GroupChatsActivity.this, ChatActivity.class);
         chatActivityIntent.putExtra("group_name", groupName);
@@ -229,40 +313,91 @@ public class GroupChatsActivity extends AppCompatActivity {
                     String currentGroupTopic = String.valueOf(group.child("topic").getValue());
                     String currentGroupTopicLink = String.valueOf(group.child("topicLink"));
                     String currentGroupDescription = String.valueOf(group.child("description"));
+                    Iterable<DataSnapshot> iterableMembers = group.child("members").getChildren();
+                    Iterable<DataSnapshot> iterableRequests = group.child("joinRequests").getChildren();
+                    Iterable<DataSnapshot> iterableBanned = group.child("bannedMembers").getChildren();
+
+                    //get the group members
+                    ArrayList<String> currentGroupMembers = new ArrayList<>();
+                    for(DataSnapshot member: iterableMembers)
+                    {
+                        currentGroupMembers.add(String.valueOf(member.getValue()));
+                    }
+
+                    //Log.i(TAG, "Retrieved members of " + currentGroupName + " = " + currentGroupMembers);
+                    //get the group requests
+                    ArrayList<String> currentGroupRequests = new ArrayList<>();
+                    for(DataSnapshot request: iterableRequests)
+                    {
+                        currentGroupRequests.add(String.valueOf(request.getValue()));
+                    }
+
+                    //get the group banned members
+                    ArrayList<String> currentGroupBanned = new ArrayList<>();
+                    for(DataSnapshot banned: iterableBanned)
+                    {
+                        currentGroupBanned.add(String.valueOf(banned.getValue()));
+                    }
 
                     //add group name and key to hashmap if current logged user is part of group
-                    if(TextUtils.equals(Globals.deviceUser.getUserName(), currentGroupAdmin))
+                    if(currentGroupMembers.contains(Globals.deviceUser.getUserName()))
                     {
-                        mGroupsHashMap.put(currentGroupName, currentGroupKey);
+                        if(currentGroupRequests.size() > 0 && TextUtils.equals(currentGroupAdmin, Globals.deviceUser.getUserName()))
+                        {
+                            String groupMapKey = currentGroupName + "(" + currentGroupRequests.size() + " join request)";
+                            mGroupsHashMap.put(groupMapKey, currentGroupKey);
+                        }
+                        else
+                        {
+                            mGroupsHashMap.put(currentGroupName, currentGroupKey);
+                        }
+
                     }
 
                     //make group object
                     Group currentGroup = new Group(currentGroupName, currentGroupAdmin, currentGroupDescription,
                                                     currentGroupStatus, currentGroupTopic, currentGroupTopicLink, currentGroupCreateDate);
                     currentGroup.setNumMembers(Integer.valueOf(currentGroupNumMembers));
+                    currentGroup.setUniqueKey(currentGroupKey);
+                    currentGroup.setMembers(currentGroupMembers);
+                    currentGroup.setJoinRequests(currentGroupRequests);
+                    currentGroup.setBannedMembers(currentGroupBanned);
 
                     //add to groups arraylist
                     mGroups.add(currentGroup);
 
-                    //make and set card item info for active groups recycler
-                    String currentGroupInfo = "<ul>" +
-                                                "<li> &nbsp; Moderator:&nbsp; " + currentGroupAdmin + "</li>" +
-                                                "<li>&nbsp;" + currentGroupNumMembers + " participants </li>" +
-                                                "<li> &nbsp;Started on:&nbsp; " + currentGroupCreateDate + "</li>" +
-                                            "</ul>";
-
-                    ActiveGroupCardItem currentGroupCardItem = new ActiveGroupCardItem(currentGroupName, currentGroupStatus, currentGroupInfo);
-
-                    if(TextUtils.isEmpty(currentGroupTopic))
+                    //make and set card item info for active groups recycler only if current user is not part or banned
+                    if(currentGroupBanned.contains(Globals.deviceUser.getUserName()))
                     {
-                        currentGroupCardItem.setTopic("No assigned topic");
+                        //notify user they have been banned via dialog
+                        notifyBan(currentGroupName);
                     }
                     else
                     {
-                        currentGroupCardItem.setTopic(currentGroupTopic);
+                        //make card item if user in not a member
+                        if(!currentGroupMembers.contains(Globals.deviceUser.getUserName()))
+                        {
+                            String currentGroupInfo = "<ul>" +
+                                    "<li> &nbsp; Moderator:&nbsp; " + currentGroupAdmin + "</li>" +
+                                    "<li>&nbsp;" + currentGroupNumMembers + " participants </li>" +
+                                    "<li> &nbsp;Started on:&nbsp; " + currentGroupCreateDate + "</li>" +
+                                    "</ul>";
+
+                            ActiveGroupCardItem currentGroupCardItem = new ActiveGroupCardItem(currentGroupName, currentGroupStatus, currentGroupInfo, currentGroup);
+
+                            if(TextUtils.isEmpty(currentGroupTopic))
+                            {
+                                currentGroupCardItem.setTopic("No assigned topic");
+                            }
+                            else
+                            {
+                                currentGroupCardItem.setTopic(currentGroupTopic);
+                            }
+
+                            mActiveGroupsCardItems.add(currentGroupCardItem);
+                        }
                     }
 
-                    mActiveGroupsCardItems.add(currentGroupCardItem);
 
                 }
 
@@ -275,7 +410,7 @@ public class GroupChatsActivity extends AppCompatActivity {
                 //notify active groups recycler view
                 mActiveGroupRecycleAdapter.notifyDataSetChanged();
 
-                Log.i(TAG, "retrieveGroups() => retrieved groups: " + mUserChatTitles);
+                //Log.i(TAG, "retrieveGroups() => retrieved groups: " + mUserChatTitles);
 
 
             }
@@ -285,6 +420,23 @@ public class GroupChatsActivity extends AppCompatActivity {
 
             }
         });
+    }
+
+    //notify user ban
+    private void notifyBan(String groupName)
+    {
+        AlertDialog.Builder userBanned = new AlertDialog.Builder(GroupChatsActivity.this);
+        userBanned.setTitle("Banned from group");
+        userBanned.setIcon(R.drawable.ic_action_warning);
+        userBanned.setMessage("You have been banned from " + groupName + " the group admin");
+        userBanned.setCancelable(true);
+        userBanned.setPositiveButton("Dismiss", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                dialogInterface.dismiss();
+            }
+        });
+        userBanned.show();
     }
 
     private void setUpMenu ()
@@ -408,6 +560,7 @@ public class GroupChatsActivity extends AppCompatActivity {
                 {
                     Toast.makeText(GroupChatsActivity.this, group.getName() + " is created successfully", Toast.LENGTH_SHORT);
                     Log.i(TAG, "createNewGroup() => group name " + group.getName() + " created successfully");
+                    mDatabaseHelper.bannedAndRequestsInit(group.getUniqueKey());
 
                 }
 

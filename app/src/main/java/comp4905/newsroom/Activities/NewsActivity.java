@@ -440,6 +440,7 @@ public class NewsActivity extends AppCompatActivity {
                 {
                     Toast.makeText(NewsActivity.this, group.getName() + " is created successfully", Toast.LENGTH_SHORT);
                     Log.i(TAG, "createNewGroup() => group name " + group.getName() + " created successfully");
+                    mDatabaseHelper.bannedAndRequestsInit(group.getUniqueKey());
 
                     //go to groups activity
 
