@@ -16,6 +16,7 @@ public class Group {
     private ArrayList<String> members;
     private ArrayList<String> joinRequests;
     private ArrayList<String> bannedMembers;
+    private ArrayList<String> banNotices;
 
     public Group(String title,String admin, String groupDescription, String groupStatus, String topic, String topicUrl, String creationDate) {
         name = title;
@@ -30,6 +31,7 @@ public class Group {
         members.add(admin);
         joinRequests = new ArrayList<>();
         bannedMembers = new ArrayList<>();
+        banNotices = new ArrayList<>();
     }
 
     //GETTERS
@@ -45,6 +47,7 @@ public class Group {
     public ArrayList<String> getMembers() { return members; }
     public ArrayList<String> getBannedMembers() { return bannedMembers; }
     public ArrayList<String> getJoinRequests() { return joinRequests; }
+    public ArrayList<String> getBanNotices() { return banNotices; }
 
     //SETTERS
     public void setName(String title) { name = title; }
@@ -59,4 +62,5 @@ public class Group {
     public void setMembers(ArrayList<String> groupMembers) { members = groupMembers; }
     public void setBannedMembers(ArrayList<String> banned) { bannedMembers = banned; }
     public void setJoinRequests(ArrayList<String> requests) { joinRequests = requests; }
+    public void setBanNotices(ArrayList<String> notices) { banNotices = notices; }
 }

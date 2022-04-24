@@ -117,7 +117,7 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <ImageView
-        android:id="@+id/chat_settings_menu"
+        android:id="@+id/chat_settings_info"
         android:layout_width="60dp"
         android:layout_height="51dp"
         android:layout_marginTop="20dp"

@@ -245,7 +245,7 @@ public class NewsActivity extends AppCompatActivity {
     //function to inflate variable and filter views
     private void inflateVariables()
     {
-        mUserMenu = (ImageView) findViewById(R.id.chat_settings_menu);
+        mUserMenu = (ImageView) findViewById(R.id.chat_settings_info);
         mNewsSearchBar = (SearchView) findViewById(R.id.news_search_bar);
         mSearchNewsButton = (Button) findViewById(R.id.news_search_button);
         mFilterButton = (Button) findViewById(R.id.filter_news_button);

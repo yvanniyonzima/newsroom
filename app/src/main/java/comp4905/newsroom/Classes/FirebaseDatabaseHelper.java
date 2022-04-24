@@ -166,6 +166,12 @@ public class FirebaseDatabaseHelper {
         return mGroupReference;
     }
 
+    //RETRIEVE SINGLE GROUP
+    public DatabaseReference getSingleGroup(String groupKey)
+    {
+        return mGroupReference.child(groupKey);
+    }
+
     //GET A NEW MESSAGE KEY
     public String getNewMessageKey(String groupKey)
     {
@@ -188,7 +194,7 @@ public class FirebaseDatabaseHelper {
     //ADD USER TO GROUP MEMBERS
     public Task<DataSnapshot> getGroupMembers(String groupKey)
     {
-        Log.i(TAG, "addUserToGroup() => retrieving members for group " + groupKey);
+        Log.i(TAG, "getGroupMembers() => retrieving members for group " + groupKey);
         return mGroupReference.child(groupKey).child("members").get();
     }
 
@@ -282,6 +288,78 @@ public class FirebaseDatabaseHelper {
     private void updateJoinRequests(String groupKey, ArrayList<String> requestingUsers)
     {
         mGroupReference.child(groupKey).child("joinRequests").setValue(requestingUsers);
+    }
+
+    //banned notifications
+    public void removeBanNotification(String groupKey, String username)
+    {
+        Task<DataSnapshot> banSnapshot = mGroupReference.child(groupKey).child("banNotices").get();
+
+        banSnapshot.addOnCompleteListener(new OnCompleteListener<DataSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DataSnapshot> task) {
+
+                if(task.isSuccessful())
+                {
+                    if(task.getResult().exists())
+                    {
+                        Iterable<DataSnapshot> banNoticeSnapshots = task.getResult().getChildren();
+
+                        if(banNoticeSnapshots != null)
+                        {
+                            ArrayList<String> notices = new ArrayList<>();
+
+                            for(DataSnapshot notice: banNoticeSnapshots)
+                            {
+                                notices.add(String.valueOf(notice.getValue()));
+                            }
+
+                            //remove the user from the notice
+                            notices.remove(username);
+
+                            //set the value
+                            mGroupReference.child(groupKey).child("banNotices").setValue(notices);
+
+                        }
+
+
+                    }
+                }
+
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+
+            }
+        });
+
+    }
+
+    public Task<Void> updateStatus(String groupKey, String status)
+    {
+        return mGroupReference.child(groupKey).child("status").setValue(status);
+    }
+
+    public Task<DataSnapshot> retrieveUserBanCount(String username)
+    {
+        return mUserReference.child(username).child("banCount").get();
+    }
+
+    public Task<Void> updateRequestList(String groupKey, ArrayList<String> usernames)
+    {
+        return mGroupReference.child(groupKey).child("joinRequests").setValue(usernames);
+    }
+
+    public Task<Void> updateMembers(String groupKey, ArrayList<String> members, int membersCount)
+    {
+        mGroupReference.child(groupKey).child("numMembers").setValue(membersCount);
+        return mGroupReference.child(groupKey).child("members").setValue(members);
+    }
+
+    public Task<Void> deleteGroupChat(String groupKey)
+    {
+        return mGroupReference.child(groupKey).removeValue();
     }
 
 

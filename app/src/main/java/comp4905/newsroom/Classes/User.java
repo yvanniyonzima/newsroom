@@ -11,6 +11,7 @@ public class User {
     private String email;
     private String password;
     private ArrayList<String> favorites;
+    private int banCount;
 
     //constructors
     public User(){}
@@ -22,6 +23,7 @@ public class User {
         this.userName = userName;
         this.email = email;
         this.password = password;
+        banCount = 0;
     }
 
     public User(String firstName, String lastName, String userName, String email, String password, ArrayList<String> favorites)
@@ -32,6 +34,7 @@ public class User {
         this.email = email;
         this.password = password;
         this.favorites = favorites;
+        banCount = 0;
     }
 
     //getters
@@ -41,6 +44,7 @@ public class User {
     public String getEmail() {return email; }
     public String getPassword() {return password; }
     public ArrayList<String> getFavorites() {return favorites; }
+    public int getBanCount() { return banCount; }
 
     //setters
     public void setFirstName(String firstName) {this.firstName = firstName; }
@@ -49,6 +53,7 @@ public class User {
     public void setEmail(String email) {this.email = email; }
     public void setPassword(String password) {this.password = password; }
     public void setFavorites(ArrayList<String> favorites) {this.favorites = favorites; }
+    public void setBanCount(int count) { banCount = count; }
 
     @Override
     public String toString() {
