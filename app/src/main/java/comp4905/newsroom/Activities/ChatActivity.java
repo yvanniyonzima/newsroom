@@ -446,8 +446,11 @@ public class ChatActivity extends AppCompatActivity {
                     //kick current user 0ut if they are banned WHILST IN THE CHAT
                     if(banNotifications.contains(Globals.deviceUser.getUserName()))
                     {
-                        banNotifications.remove(Globals.deviceUser.getUserName());
-                        showBanned(Globals.deviceUser.getUserName(), banNotifications);
+//                        banNotifications.remove(Globals.deviceUser.getUserName());
+//                        showBanned(Globals.deviceUser.getUserName(), banNotifications);
+                        Intent intent = new Intent(ChatActivity.this, GroupChatsActivity.class);
+                        startActivity(intent);
+                        finish();
                     }
                 }
 
@@ -632,41 +635,7 @@ public class ChatActivity extends AppCompatActivity {
                 mMessageScroll.fullScroll(ScrollView.FOCUS_DOWN);
             }
 
-            //Log.i(TAG,"displayMessage() => Message snapshot size = " + count);
         }
-
-        //Iterable<DataSnapshot> messageSnapshots = dataSnapshot.getChildren();
-
-
-//        if(messageSnapshots != null)
-//        {
-//
-//            for(DataSnapshot message: messageSnapshots)
-//            {
-//                count++;
-//                //Log.i(TAG,"displayMessage() => message key: " + message.getKey());
-//                String username = String.valueOf(message.child("sentBy").getValue());
-//                String firstName = String.valueOf(message.child("sentByFirstName").getValue());
-//                String text = String.valueOf(message.child("text").getValue());
-//                String date = String.valueOf(message.child("date").getValue());
-//                String time = String.valueOf(message.child("time").getValue());
-//
-//                if(!TextUtils.equals(text, "null"))
-//                {
-//
-//                    displayMessageFirstName(firstName, username);
-//
-//                    displayMessageText(text, username);
-//
-//                    displayMessageDateAndTime(date, time, username);
-//
-//                    mMessageScroll.fullScroll(ScrollView.FOCUS_DOWN);
-//                }
-//
-//            }
-//
-//            //Log.i(TAG,"displayMessage() => Message snapshot size = " + count);
-//        }
 
     }
 
@@ -675,7 +644,7 @@ public class ChatActivity extends AppCompatActivity {
         //username firstname textView
         TextView firstNameTextView = new TextView(this);
         firstNameTextView.setText(firstName);
-        firstNameTextView.setTextSize(20);
+        firstNameTextView.setTextSize(16);
         //make firstname bold
         firstNameTextView.setTypeface(null, Typeface.BOLD);
         firstNameTextView.setPadding(5,5,5,5);
@@ -692,7 +661,7 @@ public class ChatActivity extends AppCompatActivity {
         }
         else
         {
-            firstNameParams.setMarginStart(10);
+            firstNameParams.setMarginStart(20);
         }
         firstNameTextView.setLayoutParams(firstNameParams);
         mMessageView.addView(firstNameTextView);
@@ -704,6 +673,7 @@ public class ChatActivity extends AppCompatActivity {
         TextView messageTextView = new TextView(this);
         messageTextView.setText(message);
         messageTextView.setTextSize(16);
+        messageTextView.setTextColor(getResources().getColor(R.color.unchecked_button));
         messageTextView.setPadding(5,5,5,5);
 
 
@@ -718,7 +688,7 @@ public class ChatActivity extends AppCompatActivity {
         }
         else
         {
-            messageParams.setMarginStart(10);
+            messageParams.setMarginStart(20);
         }
 
         messageTextView.setLayoutParams(messageParams);
@@ -749,7 +719,7 @@ public class ChatActivity extends AppCompatActivity {
         }
         else
         {
-            dateTimeParams.setMargins(10, 1, 10,30);
+            dateTimeParams.setMargins(20, 1, 10,30);
         }
 
 
@@ -820,14 +790,7 @@ public class ChatActivity extends AppCompatActivity {
     {
         AlertDialog.Builder requestBuilder = new AlertDialog.Builder(ChatActivity.this);
         requestBuilder.setTitle("Join request");
-        if(banCount > 2)
-        {
-            requestBuilder.setMessage(username + " wants to join this group chat.\nThis user has been banned from " + banCount + " other groups");
-        }
-        else
-        {
-            requestBuilder.setMessage(username + " wants to join this group chat.");
-        }
+        requestBuilder.setMessage(username + " wants to join this group chat.");
         requestBuilder.setPositiveButton("Accept", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {

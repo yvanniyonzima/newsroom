@@ -61,7 +61,6 @@ public class LoginActivity extends AppCompatActivity {
             //move to create new user activity
             Intent registerIntent = new Intent(LoginActivity.this, NewUserActivity.class);
             startActivity(registerIntent);
-            finish();
         });
 
         loginButton.setOnClickListener((View v) -> {

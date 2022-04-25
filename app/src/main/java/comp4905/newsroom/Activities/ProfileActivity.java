@@ -56,7 +56,7 @@ public class ProfileActivity extends AppCompatActivity {
     private ListView mFavoriteTopics;
     private ArrayList<String> mTopics;
     private ArrayAdapter mTopicsArrayAdapter;
-    private EditText mNewTopic;
+    private TextView mOtherTopicsView;
     private Button mDoneAddingTopics;
 
     private ListView mOtherTopicsListView;
@@ -90,6 +90,7 @@ public class ProfileActivity extends AppCompatActivity {
         mFavoriteTopics = (ListView) findViewById(R.id.profile_favorite_topics);
         mOtherTopicsListView = (ListView) findViewById(R.id.profile_other_topics);
         mDoneAddingTopics = (Button) findViewById(R.id.profile_save_topics);
+        mOtherTopicsView = (TextView) findViewById(R.id.other_topics);
 
         //when activity starts, set all edit text to non editable
         disableTextViews();
@@ -248,6 +249,9 @@ public class ProfileActivity extends AppCompatActivity {
 
             //make save button appear
             mDoneAddingTopics.setVisibility(View.VISIBLE);
+
+            //make other topics title visible
+            mOtherTopicsView.setVisibility(View.VISIBLE);
         }
         else
         {
@@ -257,8 +261,12 @@ public class ProfileActivity extends AppCompatActivity {
             //make save button invisible
             mDoneAddingTopics.setVisibility(View.GONE);
 
-            //make edit butto appear
+            //make other topics title gone
+            mOtherTopicsView.setVisibility(View.GONE);
+
+            //make edit button appear
             mEditFavorites.setVisibility(View.VISIBLE);
+
         }
 
     }

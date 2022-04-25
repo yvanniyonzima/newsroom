@@ -59,6 +59,8 @@ public class FirebaseDatabaseHelper {
         return mUserReference.child(username).get();
     }
 
+    //update user ban count
+
 
     //SAVE LIKED NEWS ARTICLES
     public Task<Void> saveArticle(NewsArticle article, String userName)

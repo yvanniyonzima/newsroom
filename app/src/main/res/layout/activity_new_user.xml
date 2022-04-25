@@ -5,6 +5,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:layout_editor_absoluteX="1dp"
     tools:layout_editor_absoluteY="541dp"
+    android:background="#DADADA"
     xmlns:android="http://schemas.android.com/apk/res/android">
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -19,18 +20,30 @@
             android:layout_height="wrap_content"
             android:text="Create Account"
             android:textSize="24sp"
+            android:textColor="@color/black"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="(All fields are required)"
+            android:textColor="@color/red"
+            android:textSize="12sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/create_account_label" />
 
         <TextView
             android:id="@+id/first_name_label"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="24dp"
-            android:layout_marginTop="25dp"
-            android:text="First Name: "
-            android:textSize="12sp"
+            android:layout_marginTop="30dp"
+            android:text="First Name"
+            android:textColor="@color/black"
+            android:textSize="14sp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/create_account_label" />
 
@@ -42,8 +55,11 @@
             android:layout_marginTop="4dp"
             android:ems="10"
             android:hint="Enter firstname"
+            android:textColor="@color/black"
             android:inputType="textPersonName"
             android:textSize="16sp"
+            android:background="@drawable/message_input_background"
+            android:padding="10dp"
             app:layout_constraintStart_toStartOf="@+id/first_name_label"
             app:layout_constraintTop_toBottomOf="@+id/first_name_label" />
 
@@ -53,7 +69,8 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="20dp"
             android:text="Last Name"
-            android:textSize="12sp"
+            android:textColor="@color/black"
+            android:textSize="14sp"
             app:layout_constraintStart_toStartOf="@+id/first_name_textbox"
             app:layout_constraintTop_toBottomOf="@+id/first_name_textbox" />
 
@@ -66,7 +83,10 @@
             android:ems="10"
             android:inputType="textPersonName"
             android:hint="Enter last name"
+            android:textColor="@color/black"
             android:textSize="16sp"
+            android:padding="10dp"
+            android:background="@drawable/message_input_background"
             app:layout_constraintStart_toStartOf="@+id/last_name_label"
             app:layout_constraintTop_toBottomOf="@+id/last_name_label" />
 
@@ -76,6 +96,8 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="20dp"
             android:text="Email"
+            android:textSize="14sp"
+            android:textColor="@color/black"
             app:layout_constraintStart_toStartOf="@+id/last_name_textbox"
             app:layout_constraintTop_toBottomOf="@+id/last_name_textbox" />
 
@@ -88,7 +110,10 @@
             android:ems="10"
             android:inputType="textEmailAddress"
             android:hint="Enter your email"
+            android:textColor="@color/black"
             android:textSize="16sp"
+            android:padding="10dp"
+            android:background="@drawable/message_input_background"
             app:layout_constraintStart_toStartOf="@+id/email_label"
             app:layout_constraintTop_toBottomOf="@+id/email_label" />
 
@@ -98,6 +123,8 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="20dp"
             android:text="Username"
+            android:textSize="14sp"
+            android:textColor="@color/black"
             app:layout_constraintStart_toStartOf="@+id/email_textbox"
             app:layout_constraintTop_toBottomOf="@+id/email_textbox" />
 
@@ -110,7 +137,10 @@
             android:ems="10"
             android:inputType="textPersonName"
             android:hint="Enter a username"
+            android:textColor="@color/black"
             android:textSize="16sp"
+            android:padding="10dp"
+            android:background="@drawable/message_input_background"
             app:layout_constraintStart_toStartOf="@+id/username_label"
             app:layout_constraintTop_toBottomOf="@+id/username_label" />
 
@@ -120,6 +150,8 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="20dp"
             android:text="Password"
+            android:textSize="14sp"
+            android:textColor="@color/black"
             app:layout_constraintStart_toStartOf="@+id/username_textbox"
             app:layout_constraintTop_toBottomOf="@+id/username_textbox" />
 
@@ -132,6 +164,9 @@
             android:ems="10"
             android:hint="Enter a password"
             android:inputType="textPassword"
+            android:textColor="@color/black"
+            android:padding="10dp"
+            android:background="@drawable/message_input_background"
             app:layout_constraintStart_toStartOf="@+id/password_label"
             app:layout_constraintTop_toBottomOf="@+id/password_label" />
 
@@ -141,6 +176,8 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="20dp"
             android:text="Choose Topics of Interest"
+            android:textSize="14sp"
+            android:textColor="@color/black"
             app:layout_constraintStart_toStartOf="@+id/textView3"
             app:layout_constraintTop_toBottomOf="@+id/textView3" />
 
@@ -151,11 +188,12 @@
             android:layout_marginTop="4dp"
             android:layout_centerInParent="true"
             android:clickable="true"
-            android:background="@android:drawable/editbox_background"
             android:drawableRight="@android:drawable/arrow_down_float"
             android:drawablePadding="10dp"
             android:hint="Select Topics"
+            android:textColor="@color/black"
             android:padding="10dp"
+            android:background="@drawable/message_input_background"
             app:layout_constraintStart_toStartOf="@+id/choose_topic_label"
             app:layout_constraintTop_toBottomOf="@+id/choose_topic_label" />
 
@@ -165,6 +203,7 @@
             android:layout_height="42dp"
             android:layout_marginTop="20dp"
             android:text="Register"
+            android:backgroundTint="#1F1B9F"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/select_topic_text" />
@@ -174,9 +213,19 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
+            android:textColor="@color/black"
             android:text="@string/password_requirements"
             app:layout_constraintStart_toStartOf="@+id/password_textbox"
             app:layout_constraintTop_toBottomOf="@+id/password_textbox" />
+
+        <ImageView
+            android:id="@+id/new_back_to_login"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginRight="30dp"
+            app:layout_constraintEnd_toStartOf="@+id/create_account_label"
+            app:layout_constraintTop_toTopOf="@+id/create_account_label"
+            app:srcCompat="@drawable/arrow_back" />
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>

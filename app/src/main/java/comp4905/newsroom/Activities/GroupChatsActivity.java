@@ -384,6 +384,7 @@ public class GroupChatsActivity extends AppCompatActivity {
                         bannedNotification.remove(Globals.deviceUser.getUserName());
                         notifyBan(Globals.deviceUser.getUserName(), currentGroupKey, bannedNotification);
 
+
                     }
 
                     //make group object

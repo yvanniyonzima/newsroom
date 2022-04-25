@@ -12,6 +12,7 @@ import android.view.View;
 import android.view.Window;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -32,6 +33,7 @@ public class NewUserActivity extends AppCompatActivity {
     private static final String TAG = NewUserActivity.class.getName();
 
     //layout variables
+    private ImageView backToLogin;
     private EditText firstNameTextbox;
     private EditText lastNameTextbox;
     private EditText emailNameTextbox;
@@ -49,8 +51,6 @@ public class NewUserActivity extends AppCompatActivity {
     private ArrayList<String> mFavoriteTopics = new ArrayList<>();
     //private User mNewUser;
 
-//    private String[] topics = {"News", "Sport", "Tech", "World", "Finance", "Politics",
-//                                "Business", "Economics", "Entertainment", "Beauty", "Gaming"};
     boolean[] selectedTopics;
     ArrayList<Integer> topicsList = new ArrayList<>();
 
@@ -73,6 +73,7 @@ public class NewUserActivity extends AppCompatActivity {
         passwordTextbox = (EditText) findViewById(R.id.password_textbox);
         selectTopicTextview = (TextView) findViewById(R.id.select_topic_text);
         registerButton = (Button) findViewById(R.id.register_button);
+        backToLogin = (ImageView) findViewById(R.id.new_back_to_login);
 
         //initialize selectedTopic array
         selectedTopics = new boolean[Globals.topics.length];
@@ -111,11 +112,18 @@ public class NewUserActivity extends AppCompatActivity {
                 getTopics();
             }
         }));
+
+        backToLogin.setOnClickListener((View view) -> {
+            Intent intent = new Intent(NewUserActivity.this, LoginActivity.class);
+            startActivity(intent);
+            finish();
+        });
     }
 
     private boolean registerUser()
     {
         mFirstName = firstNameTextbox.getText().toString().trim();
+        String[] cannotContain = {".","#","$","[","]"};
         if(mFirstName.isEmpty())
         {
             AlertDialog.Builder alert = new AlertDialog.Builder(NewUserActivity.this);
@@ -164,6 +172,20 @@ public class NewUserActivity extends AppCompatActivity {
             alert.show();
             return false;
 
+        }
+
+        for(int i = 0; i < cannotContain.length;i++)
+        {
+            if(mUsername.contains(cannotContain[i]))
+            {
+                AlertDialog.Builder alert = new AlertDialog.Builder(NewUserActivity.this);
+
+                alert.setTitle("Invalid Character!");
+                alert.setMessage(("Username field must no contain '.', '#', '$', '[', or ']'"));
+                alert.setCancelable(true);
+                alert.show();
+                return false;
+            }
         }
 
         //validate password

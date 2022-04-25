@@ -111,104 +111,100 @@
 
     </LinearLayout>
 
+    <TextView
+        android:id="@+id/textView6"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
     <!--  LAYOUT FOR THE SETTINGS-->
     <ScrollView
         android:id="@+id/chat_settings_layout"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:visibility="gone"
-        android:layout_marginBottom="4dp"
+        app:layout_constraintBottom_toTopOf="@+id/textView6"
         app:layout_constraintTop_toBottomOf="@+id/line"
-        >
+        android:layout_marginBottom="4dp">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:orientation="vertical"
-            app:layout_constraintEnd_toEndOf="parent"
-            android:layout_marginTop="5dp"
             android:layout_marginLeft="10dp"
+            android:layout_marginTop="5dp"
             android:layout_marginRight="10dp"
-            >
+            android:orientation="vertical"
+            app:layout_constraintEnd_toEndOf="parent">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
-<!--
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:text="Group Info"
-                    android:gravity="center"
-                    android:textSize="20sp"
-                    android:textColor="@color/black"
-                    android:layout_marginBottom="10dp"/>
 
-                    -->
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="20dp"
-                    android:textSize="16sp"
-                    android:text="Topic"
                     android:layout_gravity="center"
+                    android:layout_marginTop="20dp"
+                    android:layout_marginBottom="4dp"
+                    android:text="Topic"
                     android:textColor="@color/black"
-                    android:layout_marginBottom="4dp"/>
+                    android:textSize="16sp" />
 
                 <TextView
                     android:id="@+id/chat_settings_topic"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_marginBottom="20dp"
                     android:text="Competition launched for £12 million grant to turbocharge UK tech growth"
-                    android:textSize="16sp"
 
                     android:textColor="@color/black"
-                    android:layout_marginBottom="20dp"/>
+                    android:textSize="16sp" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginBottom="4dp"
                     android:text="Description"
                     android:textColor="@color/black"
-                    android:textSize="16sp"
-                    android:layout_gravity="center"
-                    android:layout_marginBottom="4dp"/>
+                    android:textSize="16sp" />
 
                 <TextView
                     android:id="@+id/chat_settings_description"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_marginBottom="20dp"
                     android:text="Lets talk about Competition launched for £12 million grant to turbocharge UK tech growth"
                     android:textColor="@color/black"
-                    android:textSize="16sp"
-                    android:layout_marginBottom="20dp"/>
+                    android:textSize="16sp" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginBottom="4dp"
                     android:text="Link"
                     android:textColor="@color/black"
-                    android:textSize="16sp"
-                    android:layout_gravity="center"
-                    android:layout_marginBottom="4dp"/>
+                    android:textSize="16sp" />
 
                 <TextView
                     android:id="@+id/chat_settings_link"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_marginBottom="10dp"
+                    android:clickable="true"
                     android:text="https://www.miragenews.com/competition-launched-for-12-million-grant-to-762439"
                     android:textColor="@color/black"
-                    android:textSize="16sp"
-                    android:clickable="true"
-                    android:layout_marginBottom="10dp"/>
+                    android:textSize="16sp" />
 
             </LinearLayout>
 
             <Space
                 android:layout_width="match_parent"
-                android:layout_height="20dp"/>
+                android:layout_height="20dp" />
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -220,55 +216,56 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
+                    android:layout_marginBottom="5dp"
                     android:text="2 participants"
                     android:textColor="@color/black"
-                    android:textSize="14sp"
-                    android:layout_marginBottom="5dp"/>
+                    android:textSize="14sp" />
 
                 <TextView
                     android:id="@+id/chat_list_participants"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="Yvan Niyonzima\nShubham Sharan\nJason Lee"
-                    android:textSize="16sp"
-                    android:textColor="@color/black"/>
+                    android:textColor="@color/black"
+                    android:textSize="16sp" />
 
             </LinearLayout>
 
             <Space
                 android:layout_width="match_parent"
-                android:layout_height="20dp"/>
+                android:layout_height="20dp" />
 
             <LinearLayout
                 android:id="@+id/chat_exit_group"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
                 android:background="@drawable/exit_group_background"
-                android:clickable="true">
+                android:clickable="true"
+                android:orientation="horizontal">
 
                 <ImageView
                     android:layout_width="45dp"
                     android:layout_height="45dp"
                     android:layout_gravity="center"
-                    android:src="@drawable/ic_leave_group"/>
+                    android:src="@drawable/ic_leave_group" />
+
                 <Space
                     android:layout_width="25dp"
-                    android:layout_height="wrap_content"/>
+                    android:layout_height="wrap_content" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_gravity="center"
                     android:text="Exit Group"
-                    android:textSize="18sp"
                     android:textColor="@color/black"
-                    android:layout_gravity="center"/>
+                    android:textSize="18sp" />
 
             </LinearLayout>
 
             <Space
                 android:layout_width="match_parent"
-                android:layout_height="20dp"/>
+                android:layout_height="20dp" />
 
             <LinearLayout
                 android:id="@+id/chat_admin_controls"
@@ -280,19 +277,19 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Moderator Controls"
-                    android:textSize="20sp"
-                    android:textColor="@color/black"
+                    android:layout_marginBottom="10dp"
                     android:gravity="center"
-                    android:layout_marginBottom="10dp"/>
+                    android:text="Moderator Controls"
+                    android:textColor="@color/black"
+                    android:textSize="20sp" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_marginBottom="4dp"
                     android:text="Change Status"
                     android:textColor="@color/black"
-                    android:textSize="14sp"
-                    android:layout_marginBottom="4dp"/>
+                    android:textSize="14sp" />
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -309,44 +306,44 @@
                             android:id="@+id/chat_status_public"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Public"/>
+                            android:text="Public" />
 
                         <Space
                             android:layout_width="40dp"
-                            android:layout_height="wrap_content"/>
+                            android:layout_height="wrap_content" />
 
                         <RadioButton
                             android:id="@+id/chat_status_private"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Private"/>
+                            android:text="Private" />
                     </RadioGroup>
 
-                   <Space
-                       android:layout_width="90dp"
-                       android:layout_height="wrap_content"/>
+                    <Space
+                        android:layout_width="90dp"
+                        android:layout_height="wrap_content" />
 
                     <Button
                         android:id="@+id/chat_save_status"
                         android:layout_width="80dp"
                         android:layout_height="43dp"
-                        android:text="Save"
-                        android:backgroundTint="#575757"
                         android:layout_gravity="center"
-                        android:textSize="14sp"/>
+                        android:backgroundTint="#575757"
+                        android:text="Save"
+                        android:textSize="14sp" />
 
                 </LinearLayout>
 
                 <Space
                     android:layout_width="wrap_content"
-                    android:layout_height="10dp"/>
+                    android:layout_height="10dp" />
 
                 <LinearLayout
                     android:id="@+id/chat_requests_header"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:clickable="true">
+                    android:clickable="true"
+                    android:orientation="horizontal">
 
                     <TextView
                         android:id="@+id/chat_request_count"
@@ -355,15 +352,15 @@
                         android:layout_gravity="center"
                         android:text="3 Requests"
                         android:textColor="@color/black"
-                        android:textSize="18sp"/>
+                        android:textSize="18sp" />
 
                     <ImageView
                         android:id="@+id/chat_show_requests"
                         android:layout_width="40dp"
                         android:layout_height="40dp"
-                        android:src="@drawable/ic_arrow_down"
+                        android:layout_marginLeft="5dp"
                         android:clickable="true"
-                        android:layout_marginLeft="5dp"/>
+                        android:src="@drawable/ic_arrow_down" />
 
                 </LinearLayout>
 
@@ -371,16 +368,16 @@
                     android:id="@+id/chat_request_users"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:visibility="gone"
-                    android:layout_marginBottom="10dp"/>
+                    android:layout_marginBottom="10dp"
+                    android:visibility="gone" />
 
                 <LinearLayout
                     android:id="@+id/chat_ban_header"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
+                    android:layout_marginTop="10dp"
                     android:clickable="true"
-                    android:layout_marginTop="10dp">
+                    android:orientation="horizontal">
 
                     <TextView
                         android:id="@+id/ban_users_view"
@@ -389,15 +386,15 @@
                         android:layout_gravity="center"
                         android:text="Ban users"
                         android:textColor="@color/red"
-                        android:textSize="18sp"/>
+                        android:textSize="18sp" />
 
                     <ImageView
                         android:id="@+id/chat_ban_show_users"
                         android:layout_width="40dp"
                         android:layout_height="40dp"
-                        android:src="@drawable/ic_arrow_down"
+                        android:layout_marginLeft="5dp"
                         android:clickable="true"
-                        android:layout_marginLeft="5dp"/>
+                        android:src="@drawable/ic_arrow_down" />
 
                 </LinearLayout>
 
@@ -405,22 +402,21 @@
                     android:id="@+id/chat_users_to_ban"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:visibility="gone"
-                    android:layout_marginBottom="20dp"/>
+                    android:layout_marginBottom="20dp"
+                    android:visibility="gone" />
 
                 <TextView
                     android:id="@+id/chat_delete"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_marginTop="20dp"
+                    android:clickable="true"
                     android:text="Delete Chat"
                     android:textColor="@color/red"
-                    android:textSize="18sp"
-                    android:layout_marginTop="20dp"
-                    android:clickable="true"/>
+                    android:textSize="18sp" />
 
 
             </LinearLayout>
-
 
 
         </LinearLayout>
