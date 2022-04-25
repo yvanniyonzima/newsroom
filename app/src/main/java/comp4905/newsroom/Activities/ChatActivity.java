@@ -67,6 +67,8 @@ public class ChatActivity extends AppCompatActivity {
     private TextView mChatParticipantCountView;
     private TextView mChatParticipantView;
 
+    private LinearLayout mExitGroupView;
+
     //moderator controls
     private LinearLayout mAdminControlsView;
     private RadioGroup mChatChangeStatusRadio;
@@ -89,6 +91,7 @@ public class ChatActivity extends AppCompatActivity {
     private String mCurrentTime;
     private ArrayList<String> mCurrentMembers;
     private ArrayList<String> mBanChoices;
+    private ArrayList<String> mBanNotifications;
     private ArrayAdapter mBanChoicesAdapter;
     private ArrayList mCurrentJoinRequest;
     private ArrayAdapter<String> mRequestAdapter;
@@ -112,14 +115,10 @@ public class ChatActivity extends AppCompatActivity {
 
 
         //get the group name and key
-        mCurrentGroupName = getIntent().getExtras().get("group_name").toString();
         mCurrentGroupKey = getIntent().getExtras().get("group_key").toString();
 
         //initialize ui elements
         initializeElements();
-
-        //set the chat title
-        mChatTitleTextView.setText(mCurrentGroupName);
 
         //get the group info
         getGroupInfo();
@@ -244,11 +243,17 @@ public class ChatActivity extends AppCompatActivity {
 
         mChatParticipantCountView = (TextView) findViewById(R.id.chat_participant_count);;
         mChatParticipantView = (TextView) findViewById(R.id.chat_list_participants);
+        mExitGroupView = (LinearLayout) findViewById(R.id.chat_exit_group);
+
+        mExitGroupView.setOnClickListener((View view) -> {
+            exitGroup(mCurrentGroupKey, Globals.deviceUser.getUserName());
+        });
 
         //moderator controls
         mCurrentMembers = new ArrayList<>();
         mBanChoices = new ArrayList<>();
         mCurrentJoinRequest = new ArrayList<>();
+        mBanNotifications = new ArrayList<>();
         mChatChangeStatusRadio = (RadioGroup) findViewById(R.id.chat_settings_status);
         mChatSaveStatusButton = (Button) findViewById(R.id.chat_save_status);
         mDeleteChat = (TextView) findViewById(R.id.chat_delete);
@@ -361,6 +366,12 @@ public class ChatActivity extends AppCompatActivity {
                 //set the admin
                 mCurrentGroupAdmin = groupAdmin;
 
+                //set the name
+                mCurrentGroupName = name;
+
+                //set the textview
+                mChatTitleTextView.setText(name);
+
                 //show the moderator controls
                 if(TextUtils.equals(Globals.deviceUser.getUserName(), groupAdmin))
                 {
@@ -404,10 +415,7 @@ public class ChatActivity extends AppCompatActivity {
                     mCurrentGroup.setJoinRequests(mCurrentJoinRequest);
                 }
 
-
-
                 //get the banned users
-
                 Iterable<DataSnapshot> bannedUsers = snapshot.child("bannedMembers").getChildren();
                 if(bannedUsers != null)
                 {
@@ -417,21 +425,57 @@ public class ChatActivity extends AppCompatActivity {
                         banned.add(String.valueOf(user.getValue()));
                     }
 
-                    //kick current user put if they are banned WHILST IN THE CHAT
-                    if(banned.contains(Globals.deviceUser.getUserName()))
-                    {
-                        showBanned(Globals.deviceUser.getUserName());
-                    }
-
-                    mCurrentGroup.setBannedMembers(banned);
-
 
                 }
 
+                Iterable<DataSnapshot> iterableBanNotifications = snapshot.child("banNotification").getChildren();
+
+                if(iterableBanNotifications != null)
+                {
+                    ArrayList<String> banNotifications = new ArrayList<>();
+                    for(DataSnapshot notice : iterableBanNotifications)
+                    {
+                        banNotifications.add(String.valueOf(notice.getValue()));
+                    }
+
+                    //kick current user 0ut if they are banned WHILST IN THE CHAT
+                    if(banNotifications.contains(Globals.deviceUser.getUserName()))
+                    {
+                        banNotifications.remove(Globals.deviceUser.getUserName());
+                        showBanned(Globals.deviceUser.getUserName(), banNotifications);
+                    }
+                }
+
+
+
                 //set the chat info uis
-                mChatTopicView.setText(topic);
-                mChatDescriptionView.setText(description);
-                mChatLinkView.setText(topicLink);
+                if(TextUtils.isEmpty(topic))
+                {
+                    mChatTopicView.setText("No topic");
+                }
+                else
+                {
+                    mChatTopicView.setText(topic);
+                }
+
+                if(TextUtils.isEmpty(description))
+                {
+                    mChatDescriptionView.setText("No description");
+                }
+                else
+                {
+                    mChatDescriptionView.setText(description);
+                }
+
+                if(TextUtils.isEmpty(topicLink))
+                {
+                    mChatLinkView.setText("No link");
+                }
+                else
+                {
+                    mChatLinkView.setText(topicLink);
+                }
+
                 mChatParticipantCountView.setText(mCurrentMembers.size() + " participants");
                 String listParticipants = "";
                 for(String user : mCurrentMembers)
@@ -475,8 +519,6 @@ public class ChatActivity extends AppCompatActivity {
                 //notify data set changed for ban user listview
                 mBanChoicesAdapter.notifyDataSetChanged();
 
-
-
             }
 
             @Override
@@ -488,7 +530,7 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     //kick user out
-    private void showBanned(String username)
+    private void showBanned(String username, ArrayList<String> banNotifications)
     {
         AlertDialog.Builder banned = new AlertDialog.Builder(ChatActivity.this);
         banned.setIcon(R.drawable.ic_kicked_out);
@@ -498,7 +540,7 @@ public class ChatActivity extends AppCompatActivity {
         banned.setPositiveButton("Dismiss", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
-                mDatabaseHelper.removeBanNotification(mCurrentGroupKey, username);
+                mDatabaseHelper.updateBanedNotifications(mCurrentGroupKey, banNotifications);
 
                 Intent backToGroupChats = new Intent(ChatActivity.this, GroupChatsActivity.class);
                 startActivity(backToGroupChats);
@@ -754,6 +796,7 @@ public class ChatActivity extends AppCompatActivity {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
 
+
                 //add member to group member
                 mCurrentMembers.add(username);
                 mDatabaseHelper.addUserToGroup(mCurrentGroupKey, mCurrentMembers, mCurrentMembers.size()).addOnCompleteListener(new OnCompleteListener<Void>() {
@@ -765,6 +808,24 @@ public class ChatActivity extends AppCompatActivity {
                             Toast.makeText(ChatActivity.this, "User " + username + " added to group!", Toast.LENGTH_SHORT).show();
                             mCurrentJoinRequest.remove(index);
                             mRequestAdapter.notifyDataSetChanged();
+
+                            //update the join requests
+                            mDatabaseHelper.updateRequestList(mCurrentGroupKey, mCurrentJoinRequest);
+
+                            //update the textview
+                            if(mCurrentJoinRequest.size() > 0)
+                            {
+                                mChatRequestCount.setText(mCurrentJoinRequest.size() + " requests");
+                            }
+                            else
+                            {
+                                mChatRequestCount.setText("No requests");
+                                //hide the request view
+                                mChatRequestList.setVisibility(View.GONE);
+
+                                //change the button
+                                mChatShowRequests.setImageResource(R.drawable.ic_arrow_down);
+                            }
                         }
 
                     }
@@ -820,12 +881,14 @@ public class ChatActivity extends AppCompatActivity {
         banUserAlert.setIcon(R.drawable.ic_action_warning);
         banUserAlert.setTitle("Ban User");
         banUserAlert.setMessage("You are about to ban user " + username + " from this group. This action is not irreversible");
+
         banUserAlert.setPositiveButton("Ban User", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
 
                 //remove user from members
                 mCurrentMembers.remove(username);
+                //remove user from banned notification
                 mDatabaseHelper.updateMembers(mCurrentGroupKey, mCurrentMembers, mCurrentMembers.size()).addOnCompleteListener(new OnCompleteListener<Void>() {
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
@@ -838,6 +901,21 @@ public class ChatActivity extends AppCompatActivity {
                             mCurrentMembers.remove(username);
                             mBanChoices.remove(username);
                             mBanChoicesAdapter.notifyDataSetChanged();
+
+                            //update baned notification firebase
+                            mCurrentGroup.addUserFromBanNotice(username);
+                            mDatabaseHelper.updateBanedNotifications(mCurrentGroupKey, mCurrentGroup.getBanNotices());
+
+                            //update banned members firebase
+                            mCurrentGroup.addUserToBan(username);
+                            mDatabaseHelper.updateBanedMembers(mCurrentGroupKey, mCurrentGroup.getBannedMembers());
+
+                            //hide ban list if no more users
+                            if(mBanChoices.size() == 0)
+                            {
+                                mChatShowBan.setImageResource(R.drawable.ic_arrow_down);
+                                mChatUsersToBanList.setVisibility(View.INVISIBLE);
+                            }
 
                         }
 
@@ -861,6 +939,52 @@ public class ChatActivity extends AppCompatActivity {
             }
         });
         banUserAlert.show();
+    }
+
+    void exitGroup(String groupKey, String  username)
+    {
+        AlertDialog.Builder leaveGroup = new AlertDialog.Builder(ChatActivity.this);
+        leaveGroup.setIcon(R.drawable.ic_action_warning);
+        leaveGroup.setTitle("Leave Group Chat");
+
+        String positiveButton = "Leave";
+        if(TextUtils.equals(username, mCurrentGroupAdmin))
+        {
+            leaveGroup.setMessage("Are you sure you want to leave this group chat? As group admin, this will also delete the group chat");
+            positiveButton = "Leave and Delete";
+        }
+        else
+        {
+            leaveGroup.setMessage("Are you sure you want to leave this group chat?");
+        }
+
+        leaveGroup.setPositiveButton(positiveButton, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+
+                if(TextUtils.equals(username, mCurrentGroupAdmin))
+                {
+                    mDatabaseHelper.deleteGroupChat(groupKey);
+                }
+                else
+                {
+                    mCurrentMembers.remove(username);
+                    mDatabaseHelper.updateMembers(mCurrentGroupKey, mCurrentMembers, mCurrentMembers.size());
+                }
+
+                Intent intent = new Intent(ChatActivity.this, GroupChatsActivity.class);
+                startActivity(intent);
+            }
+        });
+
+        leaveGroup.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                dialogInterface.dismiss();
+            }
+        });
+
+        leaveGroup.show();
     }
 
     //alert for chat deleting

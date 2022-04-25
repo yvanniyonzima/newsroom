@@ -89,11 +89,17 @@
         android:id="@+id/active_groups_recycler"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:padding="4dp"
+        android:paddingHorizontal="4dp"
         android:scrollbars="vertical"
         android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHeight_default="spread"
-        app:layout_constraintTop_toBottomOf="@+id/chats_button_layout"/>
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/chats_button_layout"
+
+        />
+
+
 
 
 

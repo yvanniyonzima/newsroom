@@ -3,10 +3,12 @@ package comp4905.newsroom.Activities;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -59,12 +61,22 @@ public class LoginActivity extends AppCompatActivity {
         });
 
         loginButton.setOnClickListener((View v) -> {
-
+            hideKeyboard();
             String userEnteredUsername = userLoginTextBox.getText().toString().trim();
             String userEnteredPassword = userPasswordTextBox.getText().toString().trim();
             login(userEnteredUsername, userEnteredPassword);
 
         });
+    }
+
+    private void hideKeyboard()
+    {
+        View view = this.getCurrentFocus();
+        if(view != null)
+        {
+            InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(view.getWindowToken(),0);
+        }
     }
 
     private void login(String username, String password)

@@ -63,4 +63,7 @@ public class Group {
     public void setBannedMembers(ArrayList<String> banned) { bannedMembers = banned; }
     public void setJoinRequests(ArrayList<String> requests) { joinRequests = requests; }
     public void setBanNotices(ArrayList<String> notices) { banNotices = notices; }
+    public void addUserToBan(String username){ bannedMembers.add(username);}
+    public void removeUserFromBanNotice(String username){ banNotices.remove(username);}
+    public void addUserFromBanNotice(String username){ banNotices.add(username);}
 }

@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.ContactsContract;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.MenuItem;
@@ -27,6 +28,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.widget.NestedScrollView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -203,7 +205,7 @@ public class GroupChatsActivity extends AppCompatActivity {
                             if(task.isSuccessful())
                             {
                                 //retrieve all groups again
-                                retrieveGroups();
+                                //retrieveGroups();
 
                                 //hide active groups recycler
                                 mActiveGroupsRecyclerView.setVisibility(View.GONE);
@@ -290,6 +292,8 @@ public class GroupChatsActivity extends AppCompatActivity {
 
     private void retrieveGroups()
     {
+
+        Log.i(TAG,"getting baned notifications 1");
         mDatabaseHelper.getGroups().addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -316,6 +320,7 @@ public class GroupChatsActivity extends AppCompatActivity {
                     Iterable<DataSnapshot> iterableMembers = group.child("members").getChildren();
                     Iterable<DataSnapshot> iterableRequests = group.child("joinRequests").getChildren();
                     Iterable<DataSnapshot> iterableBanned = group.child("bannedMembers").getChildren();
+                    Iterable<DataSnapshot> iterableBanNotifications = group.child("banNotification").getChildren();
 
                     //get the group members
                     ArrayList<String> currentGroupMembers = new ArrayList<>();
@@ -354,6 +359,24 @@ public class GroupChatsActivity extends AppCompatActivity {
 
                     }
 
+                    //get the banNotification list
+                    ArrayList<String> bannedNotification = new ArrayList<>();
+                    Log.i(TAG,"getting baned notifications 2");
+                    for(DataSnapshot baned:iterableBanNotifications)
+                    {
+
+                        bannedNotification.add(String.valueOf(baned.getValue()));
+                    }
+
+                    //check if current user in the banned notification list
+                    if(bannedNotification.contains(Globals.deviceUser.getUserName()))
+                    {
+                        Log.i(TAG,"getting baned notifications 3");
+                        bannedNotification.remove(Globals.deviceUser.getUserName());
+                        notifyBan(Globals.deviceUser.getUserName(), currentGroupKey, bannedNotification);
+
+                    }
+
                     //make group object
                     Group currentGroup = new Group(currentGroupName, currentGroupAdmin, currentGroupDescription,
                                                     currentGroupStatus, currentGroupTopic, currentGroupTopicLink, currentGroupCreateDate);
@@ -367,16 +390,11 @@ public class GroupChatsActivity extends AppCompatActivity {
                     mGroups.add(currentGroup);
 
                     //make and set card item info for active groups recycler only if current user is not part or banned
-                    if(currentGroupBanned.contains(Globals.deviceUser.getUserName()))
-                    {
+                    if(!currentGroupBanned.contains(Globals.deviceUser.getUserName())) {
                         //notify user they have been banned via dialog
-                        notifyBan(currentGroupName);
-                    }
-                    else
-                    {
+
                         //make card item if user in not a member
-                        if(!currentGroupMembers.contains(Globals.deviceUser.getUserName()))
-                        {
+                        if (!currentGroupMembers.contains(Globals.deviceUser.getUserName())) {
                             String currentGroupInfo = "<ul>" +
                                     "<li> &nbsp; Moderator:&nbsp; " + currentGroupAdmin + "</li>" +
                                     "<li>&nbsp;" + currentGroupNumMembers + " participants </li>" +
@@ -385,19 +403,15 @@ public class GroupChatsActivity extends AppCompatActivity {
 
                             ActiveGroupCardItem currentGroupCardItem = new ActiveGroupCardItem(currentGroupName, currentGroupStatus, currentGroupInfo, currentGroup);
 
-                            if(TextUtils.isEmpty(currentGroupTopic))
-                            {
+                            if (TextUtils.isEmpty(currentGroupTopic)) {
                                 currentGroupCardItem.setTopic("No assigned topic");
-                            }
-                            else
-                            {
+                            } else {
                                 currentGroupCardItem.setTopic(currentGroupTopic);
                             }
 
                             mActiveGroupsCardItems.add(currentGroupCardItem);
                         }
                     }
-
 
                 }
 
@@ -423,17 +437,28 @@ public class GroupChatsActivity extends AppCompatActivity {
     }
 
     //notify user ban
-    private void notifyBan(String groupName)
+    private void notifyBan(String groupName, String groupKey, ArrayList<String> bannedNotification)
     {
         AlertDialog.Builder userBanned = new AlertDialog.Builder(GroupChatsActivity.this);
         userBanned.setTitle("Banned from group");
-        userBanned.setIcon(R.drawable.ic_action_warning);
+        userBanned.setIcon(R.drawable.ic_kicked_out);
         userBanned.setMessage("You have been banned from " + groupName + " the group admin");
         userBanned.setCancelable(true);
         userBanned.setPositiveButton("Dismiss", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
                 dialogInterface.dismiss();
+
+                Thread updateBan = new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        mDatabaseHelper.updateBanedNotifications(groupKey, bannedNotification);
+                    }
+                });
+
+                updateBan.start();
+
+
             }
         });
         userBanned.show();

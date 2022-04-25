@@ -1,5 +1,6 @@
 package comp4905.newsroom.Activities;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -13,6 +14,9 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -78,18 +82,22 @@ public class NewUserActivity extends AppCompatActivity {
             //call register user function
             if(registerUser())
             {
-                mDatabseHelper.saveUser(Globals.deviceUser).addOnSuccessListener(success ->
-                {
-                    Toast.makeText(this, "Creation successful", Toast.LENGTH_SHORT).show();
-                    Log.i(TAG, "registerButtonOnClick(): " + success.toString());
+                mDatabseHelper.saveUser(Globals.deviceUser).addOnCompleteListener(new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        if(task.isSuccessful())
+                        {
+                            Toast.makeText(NewUserActivity.this, "Creation successful", Toast.LENGTH_SHORT).show();
+                            Log.i(TAG, "registerButtonOnClick() => new user " + Globals.deviceUser.getUserName() + " created successfully");
 
-                    //INTENT TO MOVE TO NEWSACTIVITY
-                    Intent newsActivity = new Intent(NewUserActivity.this, NewsActivity.class);
-                    startActivity(newsActivity);
-
+                            //INTENT TO MOVE TO NEWSACTIVITY
+                            Intent newsActivity = new Intent(NewUserActivity.this, NewsActivity.class);
+                            startActivity(newsActivity);
+                        }
+                    }
                 }).addOnFailureListener(error ->
                 {
-                    Toast.makeText(this, error.toString(), Toast.LENGTH_SHORT).show();
+
                     Log.i(TAG, "registerButtonOnClick(): " + error.toString());
                 });
             }
@@ -219,8 +227,6 @@ public class NewUserActivity extends AppCompatActivity {
         }
 
         Globals.deviceUser = new User(mFirstName, mLastName, mUsername, mEmail, mPassword, mFavoriteTopics);
-        Toast toast = Toast.makeText(getApplicationContext(), Globals.deviceUser.toString(), Toast.LENGTH_LONG);
-        toast.show();
         Log.i(TAG, Globals.deviceUser.toString());
 
         return true;
