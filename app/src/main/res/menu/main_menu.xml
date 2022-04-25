@@ -1,22 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <group>
+        <item android:id="@+id/user_profile_menu_option"
+            android:title="Profile"/>
+        />
 
-    <item android:id="@+id/user_profile_menu_option"
-        android:title="Profile"/>
-    />
+        <item android:id="@+id/group_chats_menu_option"
+            android:title="Group Chats"/>
 
-    <item android:id="@+id/group_chats_menu_option"
-        android:title="Group Chats"/>
+        <item android:id="@+id/new_group_menu_option"
+            android:title="New Group"/>
+    </group>
 
-    <item android:id="@+id/new_group_menu_option"
-        android:title="New Group"/>
-
-    <item android:id="@+id/about_menu_option"
-        android:title="About"/>
-
-    <item android:id="@+id/logout_menu_option"
-        android:title="Logout" />
+    <group>
+        <item android:id="@+id/logout_menu_option"
+            android:title="Logout" />
+    </group>
 
 
 

@@ -9,6 +9,9 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.text.ParseException;
+import java.util.Date;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 
 import comp4905.newsroom.Classes.ArticleCardItem;
@@ -155,7 +158,8 @@ public class LikedSearchRecyclerAdapter extends RecyclerView.Adapter<LikedSearch
         holder.mArticleTitle.setText(currentItem.getTitle());
         holder.mArticleCategory.setText(currentItem.getCategory());
         holder.mArticleSummary.setText(currentItem.getSummary());
-        String publisherAndDate = currentItem.getPublisher() + " ( " + currentItem.getDate() + " )";
+
+        String publisherAndDate = currentItem.getDate().substring(0,10);
         holder.mArticlePublisherAndDate.setText(publisherAndDate);
     }
 

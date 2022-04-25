@@ -120,6 +120,7 @@ public class GroupChatsActivity extends AppCompatActivity {
         mBackButton.setOnClickListener((View view) ->{
             Intent newsIntent = new Intent(GroupChatsActivity.this, NewsActivity.class);
             startActivity(newsIntent);
+            finish();
         });
 
         //onclick for my chats buttons
@@ -129,6 +130,9 @@ public class GroupChatsActivity extends AppCompatActivity {
 
             //show user chats
             mUserChatsListView.setVisibility(View.VISIBLE);
+
+            mChatsButton.setBackgroundTintList(getApplicationContext().getResources().getColorStateList(R.color.checked_button));
+            mActiveChatsButton.setBackgroundTintList(getApplicationContext().getResources().getColorStateList(R.color.unchecked_button));
         });
 
         //onclick for active chats button
@@ -138,6 +142,9 @@ public class GroupChatsActivity extends AppCompatActivity {
 
             //show active chats recycler
             mActiveGroupsRecyclerView.setVisibility(View.VISIBLE);
+
+            mChatsButton.setBackgroundTintList(getApplicationContext().getResources().getColorStateList(R.color.unchecked_button));
+            mActiveChatsButton.setBackgroundTintList(getApplicationContext().getResources().getColorStateList(R.color.checked_button));
         });
 
         //setup main menu
@@ -166,7 +173,7 @@ public class GroupChatsActivity extends AppCompatActivity {
                 {
                     String link = mGroups.get(position).getTopicLink();
                     Uri uri = Uri.parse(link);
-                    Log.i(TAG,"buildActiveGroupRecyclerView() => following link: " + link);
+                    Log.i(TAG,"buildActiveGroupRecyclerView() => following link: " + mGroups.get(position).getTopicLink());
                     Intent visitArticlePage = new Intent(Intent.ACTION_VIEW, uri);
 
                     try {
@@ -285,6 +292,7 @@ public class GroupChatsActivity extends AppCompatActivity {
         chatActivityIntent.putExtra("group_name", groupName);
         chatActivityIntent.putExtra("group_key", groupKey);
         startActivity(chatActivityIntent);
+        finish();
 
         Log.i(TAG, "viewChat() => viewing group with name " + groupName + " and key " + groupKey);
 
@@ -315,13 +323,14 @@ public class GroupChatsActivity extends AppCompatActivity {
                     String currentGroupNumMembers = String.valueOf(group.child("numMembers").getValue());
                     String currentGroupCreateDate = String.valueOf(group.child("dateCreated").getValue());
                     String currentGroupTopic = String.valueOf(group.child("topic").getValue());
-                    String currentGroupTopicLink = String.valueOf(group.child("topicLink"));
+                    String currentGroupTopicLink = String.valueOf(group.child("topicLink").getValue());
                     String currentGroupDescription = String.valueOf(group.child("description"));
                     Iterable<DataSnapshot> iterableMembers = group.child("members").getChildren();
                     Iterable<DataSnapshot> iterableRequests = group.child("joinRequests").getChildren();
                     Iterable<DataSnapshot> iterableBanned = group.child("bannedMembers").getChildren();
                     Iterable<DataSnapshot> iterableBanNotifications = group.child("banNotification").getChildren();
 
+                    //Log.i(TAG,"link retrieved: " + currentGroupTopicLink);
                     //get the group members
                     ArrayList<String> currentGroupMembers = new ArrayList<>();
                     for(DataSnapshot member: iterableMembers)
@@ -476,15 +485,12 @@ public class GroupChatsActivity extends AppCompatActivity {
         mainMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem menuItem) {
-                if(menuItem.getItemId() == R.id.about_menu_option)
-                {
-                    //TODO:present popup of abouts page
-                }
-                else if(menuItem.getItemId() == R.id.user_profile_menu_option)
+                if(menuItem.getItemId() == R.id.user_profile_menu_option)
                 {
                     Intent userProfileIntent = new Intent(GroupChatsActivity.this, ProfileActivity.class);
                     //TODO: Pass the user information in the intent
                     startActivity(userProfileIntent);
+                    finish();
                 }
                 else if (menuItem.getItemId() == R.id.new_group_menu_option)
                 {
@@ -493,7 +499,9 @@ public class GroupChatsActivity extends AppCompatActivity {
                 }
                 else
                 {
-                    //TODO: logout
+                    Intent logout = new Intent(GroupChatsActivity.this, LoginActivity.class);
+                    startActivity(logout);
+                    finish();
                 }
                 return true;
             }
@@ -545,12 +553,12 @@ public class GroupChatsActivity extends AppCompatActivity {
 
                 if (TextUtils.isEmpty(groupName))
                 {
-                    Toast.makeText(GroupChatsActivity.this, "Please write group name", Toast.LENGTH_LONG);
+                    Toast.makeText(GroupChatsActivity.this, "Please write group name", Toast.LENGTH_LONG).show();
                 }
 
                 else if(TextUtils.isEmpty(statusChoice))
                 {
-                    Toast.makeText(GroupChatsActivity.this, "Please choose group status", Toast.LENGTH_LONG);
+                    Toast.makeText(GroupChatsActivity.this, "Please choose group status", Toast.LENGTH_LONG).show();
                 }
                 else
                 {

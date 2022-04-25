@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
@@ -15,6 +16,8 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.PopupMenu;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -26,11 +29,15 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 
 import comp4905.newsroom.Classes.FirebaseDatabaseHelper;
 import comp4905.newsroom.Classes.Globals;
+import comp4905.newsroom.Classes.Group;
+import comp4905.newsroom.Classes.NewsArticle;
 import comp4905.newsroom.R;
 
 public class ProfileActivity extends AppCompatActivity {
@@ -185,43 +192,13 @@ public class ProfileActivity extends AppCompatActivity {
         mTopicsArrayAdapter.notifyDataSetChanged();
     }
 
-    //function to setup menu
-    private void setUpMenu ()
-    {
-        //create instance of PopupMenu
-        PopupMenu mainMenu = new PopupMenu(ProfileActivity.this, mUserMenu);
-
-        //inflate the popup menu with xml file
-        mainMenu.getMenuInflater().inflate(R.menu.main_menu, mainMenu.getMenu());
-
-        //register menu with OnMenuItemClickListener
-        mainMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
-            @Override
-            public boolean onMenuItemClick(MenuItem menuItem) {
-                if(menuItem.getItemId() == R.id.about_menu_option)
-                {
-                    //TODO:present popup of abouts page
-                }
-                else if( menuItem.getItemId() == R.id.user_profile_menu_option)
-                {
-                    //Do nothing
-                }
-                else
-                {
-                    //TODO: logout
-                }
-                return true;
-            }
-        });
-
-        mainMenu.show();
-    }
 
     //function to go back to news activity
     void backToNewsActivity()
     {
         Intent backToNews = new Intent(ProfileActivity.this, NewsActivity.class);
         startActivity(backToNews);
+        finish();
 
     }
 
@@ -359,5 +336,150 @@ public class ProfileActivity extends AppCompatActivity {
         AlertDialog changePassDialog = changePassBuilder.create();
         changePassDialog.show();
 
+    }
+
+    private void setUpMenu ()
+    {
+        //create instance of PopupMenu
+        PopupMenu mainMenu = new PopupMenu(ProfileActivity.this, mUserMenu);
+
+        //inflate the popup menu with xml file
+        mainMenu.getMenuInflater().inflate(R.menu.main_menu, mainMenu.getMenu());
+
+        //register menu with OnMenuItemClickListener
+        mainMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem menuItem) {
+                if(menuItem.getItemId() == R.id.user_profile_menu_option)
+                {
+
+                }
+                else if(menuItem.getItemId() == R.id.group_chats_menu_option)
+                {
+                    Intent groupChatsIntent = new Intent(ProfileActivity.this, GroupChatsActivity.class);
+                    startActivity(groupChatsIntent);
+                    finish();
+
+                }
+                else if (menuItem.getItemId() == R.id.new_group_menu_option)
+                {
+                    //TODO:create new group
+                    groupCreation();
+                }
+                else
+                {
+                    Intent logout = new Intent(ProfileActivity.this, LoginActivity.class);
+                    startActivity(logout);
+                    finish();
+                }
+                return true;
+            }
+        });
+
+        mainMenu.show();
+    }
+
+    //function to create a new group
+    private void groupCreation()
+    {
+        AlertDialog.Builder newGroupBuilder = new AlertDialog.Builder(ProfileActivity.this);
+
+        newGroupBuilder.setTitle("Enter group details");
+
+        final View groupCreationView = getLayoutInflater().inflate(R.layout.create_group_layout, null);
+
+        EditText groupNameField = groupCreationView.findViewById(R.id.new_group_name);
+        EditText groupDescriptionField = groupCreationView.findViewById(R.id.new_group_description);
+        EditText groupTopicField = groupCreationView.findViewById(R.id.new_group_topic);
+        EditText groupTopicUrlField = groupCreationView.findViewById(R.id.new_group_topic_url);
+        final RadioGroup groupStatusRadio = groupCreationView.findViewById(R.id.new_group_status_choices);
+        final String[] checkedStatus = new String[1];
+
+        groupStatusRadio.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(RadioGroup statusGroup, int checkedSort)
+            {
+                //get the selected radiobutton
+                RadioButton selectedSorting = (RadioButton) statusGroup.findViewById(checkedSort);
+
+                //get the text of the selected id
+                checkedStatus[0] = selectedSorting.getText().toString();
+            }
+        });
+
+
+        //set the view for this Alert
+        newGroupBuilder.setView(groupCreationView);
+        newGroupBuilder.setPositiveButton("Create", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                String groupName = groupNameField.getText().toString();
+                String groupDescription = groupDescriptionField.getText().toString();
+                String groupTopic = groupTopicField.getText().toString();
+                String groupTopicUrl = groupTopicUrlField.getText().toString();
+                String statusChoice = checkedStatus[0];
+
+                if (TextUtils.isEmpty(groupName))
+                {
+                    Toast.makeText(groupCreationView.getContext(), "Please write a group name", Toast.LENGTH_LONG).show();
+                }
+
+                else if(TextUtils.isEmpty(statusChoice))
+                {
+                    Toast.makeText(ProfileActivity.this, "Please choose a group status", Toast.LENGTH_LONG).show();
+                }
+                else
+                {
+                    Calendar calForDate = Calendar.getInstance();
+                    SimpleDateFormat currentDateFormat = new SimpleDateFormat("MMM dd, yyyy");
+                    String groupCreationDate = currentDateFormat.format((calForDate.getTime()));
+
+                    Group createGroup = new Group(groupName, Globals.deviceUser.getUserName(), groupDescription, statusChoice, groupTopic, groupTopicUrl, groupCreationDate);
+                    createNewGroup(createGroup);
+                }
+            }
+        });
+
+        newGroupBuilder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                dialogInterface.cancel();
+
+
+            }
+        });
+
+        newGroupBuilder.show();
+
+    }
+
+
+    private void createNewGroup(Group group)
+    {
+        mDatabaseHelper.saveNewGroup(group).addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+                if(task.isSuccessful())
+                {
+                    Toast.makeText(ProfileActivity.this, group.getName() + " is created successfully", Toast.LENGTH_SHORT);
+                    Log.i(TAG, "createNewGroup() => group name " + group.getName() + " created successfully");
+                    mDatabaseHelper.bannedAndRequestsInit(group.getUniqueKey());
+
+                    //go to groups activity
+                    Intent intent = new Intent(ProfileActivity.this, GroupChatsActivity.class);
+                    startActivity(intent);
+                    finish();
+
+                }
+
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Toast.makeText(ProfileActivity.this, group.getName() + " failed to created", Toast.LENGTH_SHORT);
+                Log.e(TAG, "createNewGroup() => group name " + group.getName() + " was not created");
+                Log.e(TAG, "createNewGroup() => : " + e);
+            }
+        });
     }
 }

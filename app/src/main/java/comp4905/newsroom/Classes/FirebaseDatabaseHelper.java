@@ -189,7 +189,7 @@ public class FirebaseDatabaseHelper {
     //RETRIEVE MESSAGES FOR GROUPS
     public DatabaseReference getGroupMessages(String groupKey)
     {
-        return mGroupReference.child(groupKey);
+        return mGroupReference.child(groupKey).child("messages");
     }
 
     //ADD USER TO GROUP MEMBERS

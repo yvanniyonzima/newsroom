@@ -3,6 +3,7 @@ package comp4905.newsroom.Classes;
 import android.util.Log;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Random;
 
 import okhttp3.OkHttpClient;
@@ -42,11 +43,12 @@ public class NewsAPIClient
         //add the language to the url (currently defaulted to english)
         fullURL += "languages=en";
 
-        //indeces to choose from for initial search
-        int[] indeces = new int[Globals.deviceUser.getFavorites().size()];
+        //indices to choose from for initial search
+        ArrayList<Integer> indeces = new ArrayList<>();
+
         for(int i = 0; i < Globals.deviceUser.getFavorites().size(); i++)
         {
-            indeces[i] = i;
+            indeces.add(i);
         }
 
         Random rand = new Random();
@@ -55,7 +57,8 @@ public class NewsAPIClient
         int searchStringLength = 0;
         for(int i = 0; i < Globals.deviceUser.getFavorites().size(); i++)
         {
-            int randomIndex = rand.nextInt(indeces.length);
+            int randomIndex = rand.nextInt(indeces.size());
+            indeces.remove(randomIndex);
             searchStringLength +=  Globals.deviceUser.getFavorites().get(randomIndex).length() + 1;
 
             if(searchStringLength > 24)
@@ -67,11 +70,11 @@ public class NewsAPIClient
                 //first topic added to url
                 if((searchStringLength - Globals.deviceUser.getFavorites().get(randomIndex).length()) == 0)
                 {
-                    fullURL += Globals.deviceUser.getFavorites().get(i).toLowerCase();
+                    fullURL += Globals.deviceUser.getFavorites().get(randomIndex).toLowerCase();
                 }
                 else
                 {
-                    fullURL += "%20" + Globals.deviceUser.getFavorites().get(i).toLowerCase();
+                    fullURL += "%20" + Globals.deviceUser.getFavorites().get(randomIndex).toLowerCase();
                 }
             }
 
@@ -257,18 +260,28 @@ public class NewsAPIClient
         }
 
         //add the languages
+        Log.i(TAG, "searchTopic() => Request:" + languages);
         topicSearchUrl += "&languages=";
-        for(int i = 0; i < languages.length; i++)
+        if(languages.length == 0)
         {
-            if(i == (languages.length - 1))
+            topicSearchUrl += "en";
+        }
+        else
+        {
+            for(int i = 0; i < languages.length; i++)
             {
-                topicSearchUrl += Globals.languagesMap.get(languages[i]);
-            }
-            else
-            {
-                topicSearchUrl += Globals.languagesMap.get(languages[i]) + "%2C";
+                if(i == (languages.length - 1))
+                {
+                    topicSearchUrl += Globals.languagesMap.get(languages[i]);
+                }
+                else
+                {
+                    topicSearchUrl += Globals.languagesMap.get(languages[i]) + "%2C";
+                }
             }
         }
+
+
 
         //add the sorting
         if(sorting != null && sorting.length() > 0)

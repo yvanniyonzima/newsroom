@@ -93,6 +93,7 @@ public class NewUserActivity extends AppCompatActivity {
                             //INTENT TO MOVE TO NEWSACTIVITY
                             Intent newsActivity = new Intent(NewUserActivity.this, NewsActivity.class);
                             startActivity(newsActivity);
+                            finish();
                         }
                     }
                 }).addOnFailureListener(error ->

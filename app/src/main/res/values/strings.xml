@@ -25,6 +25,8 @@
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
 
+    <string name="required"><b><i>Required</i></b></string>
+
     <string-array name="group_status_choices">
         <item>Public</item>
         <item>Private</item>
@@ -33,4 +35,5 @@
     <string-array name="group_no_saved_articles">
         <item>No articles saved</item>
     </string-array>
+
 </resources>

@@ -44,6 +44,16 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"/>
 
+    <View
+        android:id="@+id/line"
+        android:layout_width="match_parent"
+        android:layout_height="3dp"
+        android:background="@drawable/line"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/chat_title_textview"
+        android:layout_marginTop="20dp"/>
+
     <ScrollView
         android:id="@+id/chat_scroll_view"
         android:layout_width="match_parent"
@@ -54,7 +64,7 @@
         app:layout_constraintBottom_toTopOf="@+id/edit_message_layout"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/chat_title_textview">
+        app:layout_constraintTop_toBottomOf="@+id/line">
 
         <LinearLayout
             android:id="@+id/message_view_layout"
@@ -73,14 +83,17 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:visibility="visible"
+        android:padding="5dp"
         android:layout_marginBottom="4dp"
+        android:background="#575757"
         app:layout_constraintBottom_toBottomOf="parent">
 
         <EditText
             android:id="@+id/chat_message_edit"
             android:layout_width="320dp"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="10dp"
+            android:layout_marginLeft="5dp"
+            android:background="@drawable/message_input_background"
             android:padding="17dp"
             android:hint="Type your message here.."/>
 
@@ -90,8 +103,8 @@
 
         <ImageView
             android:id="@+id/send_message_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
             android:layout_gravity="center"
             android:clickable="true"
             android:src="@drawable/ic_send_24"/>
@@ -105,7 +118,7 @@
         android:layout_height="0dp"
         android:visibility="gone"
         android:layout_marginBottom="4dp"
-        app:layout_constraintTop_toBottomOf="@+id/chat_title_textview"
+        app:layout_constraintTop_toBottomOf="@+id/line"
         >
 
         <LinearLayout
@@ -122,7 +135,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
-
+<!--
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
@@ -132,11 +145,15 @@
                     android:textColor="@color/black"
                     android:layout_marginBottom="10dp"/>
 
+                    -->
+
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textSize="14sp"
+                    android:layout_marginTop="20dp"
+                    android:textSize="16sp"
                     android:text="Topic"
+                    android:layout_gravity="center"
                     android:textColor="@color/black"
                     android:layout_marginBottom="4dp"/>
 
@@ -146,15 +163,17 @@
                     android:layout_height="wrap_content"
                     android:text="Competition launched for £12 million grant to turbocharge UK tech growth"
                     android:textSize="16sp"
+
                     android:textColor="@color/black"
-                    android:layout_marginBottom="10dp"/>
+                    android:layout_marginBottom="20dp"/>
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Description"
                     android:textColor="@color/black"
-                    android:textSize="14sp"
+                    android:textSize="16sp"
+                    android:layout_gravity="center"
                     android:layout_marginBottom="4dp"/>
 
                 <TextView
@@ -164,14 +183,15 @@
                     android:text="Lets talk about Competition launched for £12 million grant to turbocharge UK tech growth"
                     android:textColor="@color/black"
                     android:textSize="16sp"
-                    android:layout_marginBottom="10dp"/>
+                    android:layout_marginBottom="20dp"/>
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Link"
                     android:textColor="@color/black"
-                    android:textSize="14sp"
+                    android:textSize="16sp"
+                    android:layout_gravity="center"
                     android:layout_marginBottom="4dp"/>
 
                 <TextView
@@ -199,6 +219,7 @@
                     android:id="@+id/chat_participant_count"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_gravity="center"
                     android:text="2 participants"
                     android:textColor="@color/black"
                     android:textSize="14sp"
@@ -223,11 +244,13 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
+                android:background="@drawable/exit_group_background"
                 android:clickable="true">
 
                 <ImageView
-                    android:layout_width="30dp"
-                    android:layout_height="30dp"
+                    android:layout_width="45dp"
+                    android:layout_height="45dp"
+                    android:layout_gravity="center"
                     android:src="@drawable/ic_leave_group"/>
                 <Space
                     android:layout_width="25dp"
@@ -237,8 +260,8 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Exit Group"
-                    android:textSize="16sp"
-                    android:textColor="@color/red"
+                    android:textSize="18sp"
+                    android:textColor="@color/black"
                     android:layout_gravity="center"/>
 
             </LinearLayout>
@@ -308,8 +331,9 @@
                         android:layout_width="80dp"
                         android:layout_height="43dp"
                         android:text="Save"
+                        android:backgroundTint="#575757"
                         android:layout_gravity="center"
-                        android:textSize="12sp"/>
+                        android:textSize="14sp"/>
 
                 </LinearLayout>
 
@@ -331,12 +355,12 @@
                         android:layout_gravity="center"
                         android:text="3 Requests"
                         android:textColor="@color/black"
-                        android:textSize="16sp"/>
+                        android:textSize="18sp"/>
 
                     <ImageView
                         android:id="@+id/chat_show_requests"
-                        android:layout_width="30dp"
-                        android:layout_height="30dp"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
                         android:src="@drawable/ic_arrow_down"
                         android:clickable="true"
                         android:layout_marginLeft="5dp"/>
@@ -365,12 +389,12 @@
                         android:layout_gravity="center"
                         android:text="Ban users"
                         android:textColor="@color/red"
-                        android:textSize="16sp"/>
+                        android:textSize="18sp"/>
 
                     <ImageView
                         android:id="@+id/chat_ban_show_users"
-                        android:layout_width="30dp"
-                        android:layout_height="30dp"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
                         android:src="@drawable/ic_arrow_down"
                         android:clickable="true"
                         android:layout_marginLeft="5dp"/>
@@ -382,7 +406,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:visibility="gone"
-                    android:layout_marginBottom="10dp"/>
+                    android:layout_marginBottom="20dp"/>
 
                 <TextView
                     android:id="@+id/chat_delete"
@@ -390,7 +414,7 @@
                     android:layout_height="wrap_content"
                     android:text="Delete Chat"
                     android:textColor="@color/red"
-                    android:textSize="16sp"
+                    android:textSize="18sp"
                     android:layout_marginTop="20dp"
                     android:clickable="true"/>
 

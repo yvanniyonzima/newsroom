@@ -2,6 +2,8 @@ package comp4905.newsroom.Activities;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.view.MenuCompat;
+import androidx.core.widget.PopupMenuCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -259,11 +261,15 @@ public class NewsActivity extends AppCompatActivity {
         mNews.setOnClickListener((View view) -> {
             mLikedNewsRecycleView.setVisibility(View.GONE);
             mNewsRecyclerView.setVisibility(View.VISIBLE);
+            mNews.setBackgroundTintList(getApplicationContext().getResources().getColorStateList(R.color.checked_button));
+            mLikes.setBackgroundTintList(getApplicationContext().getResources().getColorStateList(R.color.unchecked_button));
         });
 
         mLikes.setOnClickListener((View view) -> {
             mNewsRecyclerView.setVisibility(View.GONE);
             mLikedNewsRecycleView.setVisibility(View.VISIBLE);
+            mNews.setBackgroundTintList(getApplicationContext().getResources().getColorStateList(R.color.unchecked_button));
+            mLikes.setBackgroundTintList(getApplicationContext().getResources().getColorStateList(R.color.checked_button));
         });
 
         /*INFLATE FILTER VIEWS AND VARIABLES*/
@@ -316,20 +322,18 @@ public class NewsActivity extends AppCompatActivity {
         mainMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem menuItem) {
-                if(menuItem.getItemId() == R.id.about_menu_option)
-                {
-                    //TODO:present popup of abouts page
-                }
-                else if(menuItem.getItemId() == R.id.user_profile_menu_option)
+                 if(menuItem.getItemId() == R.id.user_profile_menu_option)
                 {
                     Intent userProfileIntent = new Intent(NewsActivity.this, ProfileActivity.class);
                     //TODO: Pass the user information in the intent
                     startActivity(userProfileIntent);
+                    finish();
                 }
                 else if(menuItem.getItemId() == R.id.group_chats_menu_option)
                 {
                     Intent groupChatsIntent = new Intent(NewsActivity.this, GroupChatsActivity.class);
                     startActivity(groupChatsIntent);
+                    finish();
 
                 }
                 else if (menuItem.getItemId() == R.id.new_group_menu_option)
@@ -339,7 +343,9 @@ public class NewsActivity extends AppCompatActivity {
                 }
                 else
                 {
-                    //TODO: logout
+                   Intent logout = new Intent(NewsActivity.this, LoginActivity.class);
+                   startActivity(logout);
+                   finish();
                 }
                 return true;
             }
@@ -398,12 +404,12 @@ public class NewsActivity extends AppCompatActivity {
 
                 if (TextUtils.isEmpty(groupName))
                 {
-                    Toast.makeText(NewsActivity.this, "Please write group name", Toast.LENGTH_LONG);
+                    Toast.makeText(groupCreationView.getContext(), "Please write a group name", Toast.LENGTH_LONG).show();
                 }
 
                 else if(TextUtils.isEmpty(statusChoice))
                 {
-                    Toast.makeText(NewsActivity.this, "Please choose group status", Toast.LENGTH_LONG);
+                    Toast.makeText(NewsActivity.this, "Please choose a group status", Toast.LENGTH_LONG).show();
                 }
                 else
                 {
@@ -443,6 +449,9 @@ public class NewsActivity extends AppCompatActivity {
                     mDatabaseHelper.bannedAndRequestsInit(group.getUniqueKey());
 
                     //go to groups activity
+                    Intent intent = new Intent(NewsActivity.this, GroupChatsActivity.class);
+                    startActivity(intent);
+                    finish();
 
                 }
 
@@ -851,7 +860,11 @@ public class NewsActivity extends AppCompatActivity {
 
         //filter submit and cancel
         mSubmitFilter.setOnClickListener((View view) -> { handleSubmitFilter(); });
-        mCancelFilter.setOnClickListener((View view) -> { hideFilterViews();});
+        mCancelFilter.setOnClickListener((View view) -> {
+            hideFilterViews();
+            //set title of filter button
+            mFilterButton.setText("Filter");
+        });
     }
 
     //functions for language filtering
@@ -1148,10 +1161,11 @@ public class NewsActivity extends AppCompatActivity {
 
             if(!topicSearchLanguages.isEmpty() && topicSearchLanguages != null)
             {
-                topicSearchLanguagesArray = topicSearchLanguages.split("' ");
+                topicSearchLanguagesArray = topicSearchLanguages.split(", ");
             }
             else
             {
+                topicSearchLanguagesArray = new String[1];
                 topicSearchLanguagesArray[0] = "English";
             }
 

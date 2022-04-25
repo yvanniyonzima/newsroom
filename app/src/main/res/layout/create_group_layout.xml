@@ -5,13 +5,33 @@
     android:layout_height="match_parent"
     android:padding="16dp">
 
-    <TextView
+    <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Enter group name"
-        android:padding="2dp"
-        android:textSize="14sp"
-        android:layout_marginBottom="3dp"/>
+        android:orientation="horizontal"
+        android:layout_marginBottom="3dp">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Enter group name"
+            android:padding="2dp"
+            android:textSize="14sp"/>
+
+        <Space
+            android:layout_width="10dp"
+            android:layout_height="wrap_content"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/required"
+            android:textColor="@color/red"
+            android:padding="2dp"
+            android:textSize="12sp"/>
+
+    </LinearLayout>
+
+
 
     <EditText
         android:id="@+id/new_group_name"
@@ -71,13 +91,29 @@
         android:hint="https://www.fifa.com/tournaments/mens/worldcup/qatar2022/fwc-2022-draw"
         android:layout_marginBottom="5dp"/>
 
-
-    <TextView
+    <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Pick a status"
-        android:textSize="14sp"
-        android:layout_marginBottom="4dp"/>
+        android:orientation="horizontal"
+        android:layout_marginBottom="4dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Pick a status"
+            android:textSize="14sp"/>
+
+        <Space
+            android:layout_width="10dp"
+            android:layout_height="wrap_content"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/required"
+            android:textColor="@color/red"
+            android:textSize="12sp"/>
+    </LinearLayout>
 
     <RadioGroup
         android:id="@+id/new_group_status_choices"

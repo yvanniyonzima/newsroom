@@ -59,30 +59,39 @@
                 android:layout_marginTop="20dp"
                 android:layout_gravity="center"
                 android:text="John Doe"
+                android:textColor="@color/black"
                 android:textSize="24sp" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="20dp"
+                android:layout_marginTop="10dp"
                 android:layout_gravity="left"
-                android:text="Username" />
+                android:text="Username"
+                android:textSize="16sp"
+                android:textColor="@color/black"/>
 
             <EditText
                 android:id="@+id/profile_username"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
+                android:editable="false"
                 android:ems="10"
                 android:inputType="text"
                 android:minHeight="48dp"
-                android:text="jhondoe" />
+                android:paddingLeft="10dp"
+                android:text="jhondoe"
+                android:background="@drawable/profile_rectangle"
+                android:textColor="@color/black" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="30dp"
-                android:text="Email" />
+                android:text="Email"
+                android:textSize="16sp"
+                android:textColor="@color/black"/>
 
             <EditText
                 android:id="@+id/profile_email"
@@ -91,14 +100,20 @@
                 android:layout_marginTop="10dp"
                 android:ems="10"
                 android:inputType="textPersonName"
+                android:editable="false"
                 android:minHeight="48dp"
-                android:text="jhondoe@gmail.com" />
+                android:text="jhondoe@gmail.com"
+                android:paddingLeft="10dp"
+                android:textColor="@color/black"
+                android:background="@drawable/profile_rectangle"/>
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Favorite Topics"
-                android:layout_marginTop="30dp"/>
+                android:textSize="16sp"
+                android:layout_marginTop="30dp"
+                android:textColor="@color/black"/>
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -135,6 +150,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Done"
+                android:backgroundTint="#575757"
                 android:layout_gravity="right"
                 android:visibility="gone"
                 android:layout_marginTop="10dp"
@@ -144,7 +160,9 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Password"
-                android:layout_marginTop="30dp"/>
+                android:layout_marginTop="30dp"
+                android:textColor="@color/black"
+                android:textSize="16sp"/>
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -159,7 +177,9 @@
                     android:ems="10"
                     android:inputType="textPassword"
                     android:minHeight="48dp"
-                    android:text="password" />
+                    android:text="password"
+                    android:paddingLeft="10dp"
+                    android:background="@drawable/profile_rectangle"/>
 
                 <ImageView
                     android:id="@+id/profile_change_password"

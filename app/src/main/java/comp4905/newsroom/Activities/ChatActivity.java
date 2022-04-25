@@ -13,6 +13,7 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
+import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -107,6 +108,8 @@ public class ChatActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
+        getSupportActionBar().hide();
         setContentView(R.layout.activity_chat);
 
         //get the current username
@@ -127,10 +130,12 @@ public class ChatActivity extends AppCompatActivity {
         mGoBack.setOnClickListener((View view) -> {
             Intent groupChatsIntent = new Intent(ChatActivity.this, GroupChatsActivity.class);
             startActivity(groupChatsIntent);
+            finish();
         });
 
         //send message
         mSendMessageButton.setOnClickListener((View view) -> {
+
             sendMessage();
 
             //clear the message input edit text
@@ -146,7 +151,7 @@ public class ChatActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
 
-        mMessageView.removeAllViews();
+        //mMessageView.removeAllViews();
 
         mDatabaseHelper.getGroupMessages(mCurrentGroupKey).addChildEventListener(new ChildEventListener() {
             @Override
@@ -154,7 +159,7 @@ public class ChatActivity extends AppCompatActivity {
 
                 if(dataSnapshot.exists())
                 {
-                    Log.i(TAG,"onStart() => group messages key: " + dataSnapshot.getKey());
+                    //Log.i(TAG,"onStart() => group messages key: " + dataSnapshot.getKey());
                     //mMessageView.removeAllViews();
                     displayMessage(dataSnapshot);
                 }
@@ -544,6 +549,7 @@ public class ChatActivity extends AppCompatActivity {
 
                 Intent backToGroupChats = new Intent(ChatActivity.this, GroupChatsActivity.class);
                 startActivity(backToGroupChats);
+                finish();
 
             }
         });
@@ -560,6 +566,8 @@ public class ChatActivity extends AppCompatActivity {
         }
         else
         {
+            //mMessageView.removeAllViews();
+
             Calendar calForDate = Calendar.getInstance();
             SimpleDateFormat currentDateFormat = new SimpleDateFormat("MMM dd, yyyy");
             mCurrentDate = currentDateFormat.format((calForDate.getTime()));
@@ -598,39 +606,67 @@ public class ChatActivity extends AppCompatActivity {
         //clear the message views
         //mMessageView.removeAllViews();
 
-        Iterable<DataSnapshot> messageSnapshots = dataSnapshot.getChildren();
+        Log.i(TAG,"displayMessage() => datasnapshot key" + dataSnapshot.getKey());
+
+
         int count = 0;
 
-
-        if(messageSnapshots != null)
+        if(dataSnapshot != null)
         {
+            //Log.i(TAG,"displayMessage() => message key: " + message.getKey());
+            String username = String.valueOf(dataSnapshot.child("sentBy").getValue());
+            String firstName = String.valueOf(dataSnapshot.child("sentByFirstName").getValue());
+            String text = String.valueOf(dataSnapshot.child("text").getValue());
+            String date = String.valueOf(dataSnapshot.child("date").getValue());
+            String time = String.valueOf(dataSnapshot.child("time").getValue());
 
-            for(DataSnapshot message: messageSnapshots)
+            if(!TextUtils.equals(text, "null"))
             {
-                count++;
-                //Log.i(TAG,"displayMessage() => message key: " + message.getKey());
-                String username = String.valueOf(message.child("sentBy").getValue());
-                String firstName = String.valueOf(message.child("sentByFirstName").getValue());
-                String text = String.valueOf(message.child("text").getValue());
-                String date = String.valueOf(message.child("date").getValue());
-                String time = String.valueOf(message.child("time").getValue());
 
-                if(!TextUtils.equals(text, "null"))
-                {
+                displayMessageFirstName(firstName, username);
 
-                    displayMessageFirstName(firstName, username);
+                displayMessageText(text, username);
 
-                    displayMessageText(text, username);
+                displayMessageDateAndTime(date, time, username);
 
-                    displayMessageDateAndTime(date, time, username);
-
-                    mMessageScroll.fullScroll(ScrollView.FOCUS_DOWN);
-                }
-
+                mMessageScroll.fullScroll(ScrollView.FOCUS_DOWN);
             }
 
-            Log.i(TAG,"displayMessage() => Message snapshot size = " + count);
+            //Log.i(TAG,"displayMessage() => Message snapshot size = " + count);
         }
+
+        //Iterable<DataSnapshot> messageSnapshots = dataSnapshot.getChildren();
+
+
+//        if(messageSnapshots != null)
+//        {
+//
+//            for(DataSnapshot message: messageSnapshots)
+//            {
+//                count++;
+//                //Log.i(TAG,"displayMessage() => message key: " + message.getKey());
+//                String username = String.valueOf(message.child("sentBy").getValue());
+//                String firstName = String.valueOf(message.child("sentByFirstName").getValue());
+//                String text = String.valueOf(message.child("text").getValue());
+//                String date = String.valueOf(message.child("date").getValue());
+//                String time = String.valueOf(message.child("time").getValue());
+//
+//                if(!TextUtils.equals(text, "null"))
+//                {
+//
+//                    displayMessageFirstName(firstName, username);
+//
+//                    displayMessageText(text, username);
+//
+//                    displayMessageDateAndTime(date, time, username);
+//
+//                    mMessageScroll.fullScroll(ScrollView.FOCUS_DOWN);
+//                }
+//
+//            }
+//
+//            //Log.i(TAG,"displayMessage() => Message snapshot size = " + count);
+//        }
 
     }
 
@@ -974,6 +1010,7 @@ public class ChatActivity extends AppCompatActivity {
 
                 Intent intent = new Intent(ChatActivity.this, GroupChatsActivity.class);
                 startActivity(intent);
+                finish();
             }
         });
 
@@ -1001,6 +1038,7 @@ public class ChatActivity extends AppCompatActivity {
                 mDatabaseHelper.deleteGroupChat(mCurrentGroupKey);
                 Intent intent = new Intent(ChatActivity.this, GroupChatsActivity.class);
                 startActivity(intent);
+                finish();
             }
         });
 

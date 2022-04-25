@@ -43,6 +43,7 @@
         android:layout_marginLeft="4dp"
         android:clickable="true"
         android:text="Search"
+        android:backgroundTint="#575757"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/news_search_bar"
         app:layout_constraintTop_toTopOf="@+id/news_search_bar"
@@ -54,6 +55,7 @@
         android:layout_height="50dp"
         android:clickable="true"
         android:text="News"
+        android:backgroundTint="#DADADA"
         android:layout_marginTop="10dp"
         app:layout_constraintEnd_toStartOf="@+id/textView4"
         app:layout_constraintStart_toStartOf="parent"
@@ -66,6 +68,7 @@
         android:layout_height="50dp"
         android:clickable="true"
         android:text="Likes"
+        android:backgroundTint="#575757"
         android:layout_marginTop="10dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/textView4"
@@ -106,16 +109,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/view_searches_button" />
 
-    <ProgressBar
-        android:id="@+id/progress_circular"
-        android:layout_width="100dp"
-        android:layout_height="100dp"
-        android:visibility="invisible"
-        app:layout_constraintBottom_toBottomOf="@+id/news_search_recyclerView"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
     <ImageView
         android:id="@+id/chat_settings_info"
         android:layout_width="60dp"
@@ -129,11 +122,13 @@
 
     <Button
         android:id="@+id/filter_news_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="10dp"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:layout_marginBottom="0dp"
         android:minWidth="200dp"
         android:text="Filter"
+        android:textSize="16sp"
+        android:backgroundTint="#575757"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
